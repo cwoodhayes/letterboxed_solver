@@ -55,6 +55,15 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
     pub fn max_words(&self) -> usize {
         self.max_words
     }
+    
+    /// get a neat vector of all letters in the puzzle
+    pub fn all_letters(&self) -> String {
+        let mut all = String::new();
+        for side in self.sides {
+            all.extend(side);
+        }
+        all
+    }
 }
 
 
