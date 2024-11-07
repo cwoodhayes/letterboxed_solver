@@ -1,3 +1,4 @@
+pub mod solver;
 
 /// Top-level representation of a puzzle definition.
 /// Does not contain the answer to the puzzle--merely its definition.
