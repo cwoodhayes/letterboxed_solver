@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use crate::LBPuzzleError::BadSolutionError;
 
-pub mod solver;
+pub mod solvers;
 
 /// Top-level representation of a puzzle definition.
 /// Does not contain the answer to the puzzle--merely its definition.

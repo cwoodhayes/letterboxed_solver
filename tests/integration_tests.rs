@@ -2,7 +2,7 @@
 
 // define some example input structs
 mod nyt_examples {
-    use letterboxed_solver::solver::{brute_force, };
+    use letterboxed_solver::solvers::{brute_force, };
     use letterboxed_solver::NYTBoxPuzzle;
 
     #[test]

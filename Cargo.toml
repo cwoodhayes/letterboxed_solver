@@ -8,5 +8,5 @@ criterion = "0.5.1"
 trie-rs = "0.4.2"
 
 [[bench]]
-name = "brute_force_solver"
+name = "solver_benchmark"
 harness = false

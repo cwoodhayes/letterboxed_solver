@@ -1,6 +1,6 @@
 use std::env;
 
-use letterboxed_solver::{NYTBoxPuzzle, solver::brute_force};
+use letterboxed_solver::{NYTBoxPuzzle, solvers::brute_force};
 
 fn main() {
    let args: Vec<String> = env::args().collect();

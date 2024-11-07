@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use letterboxed_solver::{solver::brute_force, NYTBoxPuzzle};
-use letterboxed_solver::solver::brute_force::solve_brute_force;
+use letterboxed_solver::{solvers::brute_force, NYTBoxPuzzle};
+use letterboxed_solver::solvers::brute_force::solve_brute_force;
 
 fn benchmark_brute_force(c: &mut Criterion) {
     let nov_6_2024 = NYTBoxPuzzle::from_str(6, "erb uln imk jav").unwrap();
