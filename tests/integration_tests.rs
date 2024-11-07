@@ -7,9 +7,7 @@ mod nyt_examples {
 
     #[test]
     fn test_example() {
-        let nov_6_2024 = NYTBoxPuzzle::from_str(6, "erb uln imk jav");
-        let nov_6_2024 = nov_6_2024.unwrap();
-        
+        let nov_6_2024 = NYTBoxPuzzle::from_str(6, "erb uln imk jav").unwrap();
         println!("{:?}", nov_6_2024);
 
         let solution = brute_force::solve_brute_force(&nov_6_2024);

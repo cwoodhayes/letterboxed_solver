@@ -46,7 +46,7 @@ mod dictionary {
         #[test]
         fn test_load_trie_dictionary() {
             // just make sure the load function actually runs and the hashset size is correct
-            let (words, n_words) = load_trie_dictionary();
+            let (_, n_words) = load_trie_dictionary();
             
             assert_eq!(n_words, 370104);
         }
@@ -67,22 +67,22 @@ pub mod brute_force {
         // all the letters we've visited before. always length L*S
         pub visited_letters: Vec<bool>
     }
-    
+
     impl _Solution {
         /// generate a copy of this solution where we've ended the current word and have
         /// started the next one (though it still needs a next letter)
         pub fn end_word(&self) -> Self {
             // end this word by starting another empty one
             let mut words = self.words.clone();
-            words.push(String::new());
-            
+            words.push(String::from(words.last().unwrap().chars().last().unwrap()));
+
             _Solution {
                 words,
                 last_idx: self.last_idx,
                 visited_letters: self.visited_letters.clone()
             }
         }
-        
+
         pub fn clone(&self) -> Self {
             _Solution {
                 words: self.words.clone(),
@@ -103,7 +103,7 @@ pub mod brute_force {
 
         // may need to use linked list here instead due to allocating a huge block of contiguous mem but we'll see
         let mut solution_queue: VecDeque<_Solution> = VecDeque::new();
-        
+
         println!("Initializing solutions...");
 
         // initialize our solution queue with solutions starting with each letter
@@ -127,8 +127,8 @@ pub mod brute_force {
 
             // cases
             let curr_word = soln.words.last().expect("There should always be a word.");
-            // if our current letters make a word
-            if dict.exact_match(curr_word) {
+            // if our current letters make a word -- note that words must be 3 letters or greater
+            if curr_word.len() >= 3 && dict.exact_match(curr_word) {
                 // if we have a working solution, return it!
                 if soln.visited_letters.iter().all(| _l | *_l ) {
                     println!("Solution found! {soln:#?}");
@@ -145,7 +145,7 @@ pub mod brute_force {
 
         None
     }
-    
+
     /// adds all letters that have possible future solutions to the queue
     fn _add_all_valid_letters<const L: usize, const S: usize>(solution_queue: &mut VecDeque<_Solution>, dict: &Trie<u8>, puzzle: &LBPuzzle<L, S>, soln_stub: &_Solution) {
         // yes i know this is inefficient, i said i was doing this the quick & dumb way to benchmark
@@ -156,18 +156,19 @@ pub mod brute_force {
         for postfix in results {
             letters.insert(postfix.chars().next().expect("There should always be a letter."));
         }
-        
+
         // intersect our valid word letters with our available puzzle letters
         let puzzle_valid_letters = &puzzle.valid_letters(soln_stub.last_idx as i32);
-        let possible_letters = letters.intersection(puzzle_valid_letters);
-        
-        // now we have a list of next letters -- lets add these to the solution queue
-        for letter in possible_letters {
-            let mut new_soln = soln_stub.clone();
-            let w = new_soln.words.last_mut().expect("There should always be a word.");
-            w.push(*letter);
-            solution_queue.push_back(new_soln);
+        for letter in puzzle_valid_letters {
+            let mut next_word = curr_word.clone();
+            next_word.push(*letter);
+            if dict.exact_match(&next_word) {
+                let mut new_soln = soln_stub.clone();
+                new_soln.words.pop();
+                new_soln.words.push(next_word);
+                solution_queue.push_back(new_soln);
+            }
         }
     }
-    
+
 }

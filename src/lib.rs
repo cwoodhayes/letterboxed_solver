@@ -76,13 +76,13 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
         }
         all
     }
-    
+
     /// the number of total letters in the puzzle (counting repeats, which I don't think usually
     /// exist anyhow)
     pub fn n_letters() -> usize {
         S * L
     }
-    
+
     /// Return None if out of range.
     pub fn idx_to_side(&self, idx: i32) -> Option<i32> {
         if 0 <= idx && idx < Self::n_letters() as i32 {
@@ -90,22 +90,22 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
         }
         None
     }
-    
-    /// returns true if the letter at index "idx" is on the side with index "side", 
+
+    /// returns true if the letter at index "idx" is on the side with index "side",
     pub fn is_idx_on_side(&self, idx: i32, side: i32) -> bool {
         self.idx_to_side(idx).unwrap_or(-1) == side
-    } 
-    
+    }
+
     /// returns a HashSet of possible next letters
     pub fn valid_letters(&self, prev_idx: i32) -> HashSet<char> {
         let mut letters = HashSet::new();
-        
+
         for (i, side) in self.sides().iter().enumerate() {
             if !self.is_idx_on_side(prev_idx, i as i32) {
                 letters.extend(side.iter());
             }
         }
-        
+
         letters
     }
 
@@ -206,7 +206,7 @@ mod tests {
         }
 
     }
-    
+
     #[test]
     fn test_from_str() {
         let sides_a = [
@@ -216,23 +216,24 @@ mod tests {
             ['j', 'a', 'v']
         ];
         let string_a = String::from("erb uln imk jav");
-        
+
         let puzzle = LBPuzzle::<4,3>::from_str(5, &string_a);
-        
+
         assert!(puzzle.is_ok());
         let puzzle = puzzle.unwrap();
         assert_eq!(puzzle.max_words(), 5);
         assert_eq!(puzzle.sides(), sides_a);
     }
-    
+
     #[test]
     fn test_index_side() {
-        assert!(LBPuzzle::<4,3>::is_idx_on_side(0, 0));
-        assert!(LBPuzzle::<4,3>::is_idx_on_side(3, 1));
-        assert!(LBPuzzle::<4,3>::is_idx_on_side(2, 0));
-        assert!(LBPuzzle::<4,3>::is_idx_on_side(11, 3));
-        
-        assert_eq!(LBPuzzle::<4,3>::idx_to_side(0), 0);
+        let puzzle = LBPuzzle::<4,3>::from_str(4, &"erb uln imk jav".to_string()).unwrap();
+        assert!(puzzle.is_idx_on_side(0, 0));
+        assert!(puzzle.is_idx_on_side(3, 1));
+        assert!(puzzle.is_idx_on_side(2, 0));
+        assert!(puzzle.is_idx_on_side(11, 3));
+
+        assert_eq!(puzzle.idx_to_side(0).unwrap(), 0);
     }
-    
+
 }

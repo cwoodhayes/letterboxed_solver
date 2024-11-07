@@ -4,4 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+criterion = "0.5.1"
 trie-rs = "0.4.2"
+
+[[bench]]
+name = "brute_force_solver"
+harness = false
