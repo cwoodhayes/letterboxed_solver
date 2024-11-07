@@ -3,9 +3,6 @@
 
 use crate::LBPuzzle;
 
-/// just a list of the words used to solve, in order
-type LBPuzzleSolution = Vec<String>;
-
 mod dictionary {
     use std::fs::File;
     use std::io::{self, BufRead};
@@ -58,110 +55,9 @@ mod dictionary {
     }
 }
 
-/// See if we can solve the puzzle given a solution
-pub fn validate_solution<const S: usize, const L: usize>(solution: &LBPuzzleSolution, puzzle: &LBPuzzle<S, L>) -> Result<(), String> {
-    // for NYT, all words must be 3 letters or more, so check that
-    for word in solution {
-        if word.len() < 3 {
-            return Err(String::from(format!("{} is <3 letters long", word)));
-        }
-    }
-    // merge the words into a simple sequence of letters
-    let mut seq= solution.get(0).unwrap().clone();
-    for word in &solution[1..] {
-        if word.chars().next() != seq.chars().last() {
-            return Err(String::from("Start & end letters don't match"));
-        }
-        seq.push_str(&word[1..]);
-    }
-
-    // validate that we can travel around the board with these letters,
-    // AND that we touch all of them when we do.
-    let mut visited_letters = [[false; L]; S];
-
-    print!("Validated: ");
-    let mut prev_side = -1;
-    'letters: for letter in seq.chars() {
-        'sides: for (i, side) in puzzle.sides().iter().enumerate() {
-            if i as i32 == prev_side {
-                continue 'sides;
-            }
-            let idx = side.iter().position( |_l| letter.eq(_l) ); 
-            if let Some(idx) = idx {
-                print!("{}", letter);
-                prev_side = i as i32;
-                visited_letters[i][idx] = true;
-                continue 'letters;
-            }
-        }
-        return Err(String::from(format!("Failed to find letter {}", letter)));
-    }
-    
-    // make sure we visited all the letters
-    for side in visited_letters {
-        if !side.iter().all(|&x| x ) {
-            return Err(String::from("Not all letters were used."));
-        }
-    }
-    
-    
-    println!("✅");
-
-    Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::NYTBoxPuzzle;
-
-    #[test]
-    fn test_validate_solution() {
-        // known solution & puzzle from https://nytletterboxed.com/letter-boxed-november-06-2024-answers/
-        let nov_6_2024 = NYTBoxPuzzle::from_str(6, "erb uln imk jav");
-        let nov_6_2024 = nov_6_2024.unwrap();
-        let valids = [
-            vec!(
-                "juvenile".to_string(),
-                "embark".to_string()
-            ),
-            vec!(
-                "murk".to_string(),
-                "kanji".to_string(),
-                "inviable".to_string()
-            )
-        ];
-        let invalids = [
-            vec!(
-                "poop".to_string()
-            ),
-            vec!(
-                "ju".to_string(),
-                "uv".to_string(),
-            ),
-            vec!(
-                "juvenile".to_string(),
-            ),
-        ];
-
-        for example in valids {
-            println!("TEST: {:?}", example);
-            assert_eq!(validate_solution(&example, &nov_6_2024), Ok(()));
-        }
-        for example in invalids {
-            println!("TEST: {:?}", example);
-            let result = validate_solution(&example, &nov_6_2024);
-            println!("\n{:?}", result);
-            assert!(result.is_err());
-        }
-
-    }
-}
-
 pub mod brute_force {
-    use crate::LBPuzzle;
+    use crate::{LBPuzzle, LBPuzzleSolution};
     use crate::solver::dictionary::load_trie_dictionary;
-    use crate::solver::LBPuzzleSolution;
 
     /// idiotic solver that just goes through every combo
     /// 

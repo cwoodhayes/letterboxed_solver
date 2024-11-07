@@ -2,7 +2,7 @@
 
 // define some example input structs
 mod nyt_examples {
-    use letterboxed_solver::solver::brute_force;
+    use letterboxed_solver::solver::{brute_force, validate_solution};
     use letterboxed_solver::NYTBoxPuzzle;
 
     #[test]
@@ -11,6 +11,7 @@ mod nyt_examples {
         let nov_6_2024 = nov_6_2024.unwrap();
 
         // todo make api and write big tests against it
-        brute_force::solve_brute_force(&nov_6_2024);
+        let solution = brute_force::solve_brute_force(&nov_6_2024);
+        assert!(validate_solution(&solution).is_ok())
     }
 }
