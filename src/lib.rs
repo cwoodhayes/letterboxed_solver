@@ -108,7 +108,7 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
 
         letters
     }
-    
+
     /// quick & easy validation that a given solution actually touches all the letters
     /// doesn't check any of the other characteristics of a valid solution.
     pub fn validate_coverage(&self, solution: &LBPuzzleSolution) -> bool {
@@ -116,7 +116,7 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
         let puz_letters = self.valid_letters(-1);
         sol_letters == puz_letters
     }
-    
+
     /// See if we can solve the puzzle given a solution
     pub fn validate_solution(&self, solution: &LBPuzzleSolution) -> Result<()> {
         // for NYT, all words must be 3 letters or more, so check that
@@ -125,13 +125,13 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
                 return Err(BadSolutionError(format!("{} is <3 letters long", word)));
             }
         }
-        // merge the words into a simple sequence of letters
-        let mut seq = solution.get(0).unwrap().clone();
+        // merge the words into a simple sequence of letters & check that the start & end chars match
+        let mut flat_solution = solution.get(0).unwrap().clone();
         for word in &solution[1..] {
-            if word.chars().next() != seq.chars().last() {
+            if word.chars().next() != flat_solution.chars().last() {
                 return Err(BadSolutionError("Start & end letters don't match".to_string()));
             }
-            seq.push_str(&word[1..]);
+            flat_solution.push_str(&word[1..]);
         }
 
         // validate that we can travel around the board with these letters,
@@ -140,7 +140,7 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
 
         print!("Validated: ");
         let mut prev_side = -1;
-        'letters: for letter in seq.chars() {
+        'letters: for letter in flat_solution.chars() {
             'sides: for (i, side) in self.sides().iter().enumerate() {
                 if i as i32 == prev_side {
                     continue 'sides;

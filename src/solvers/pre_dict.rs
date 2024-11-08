@@ -1,7 +1,7 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet};
 /// Solver where a more specific dictionary is precomputed
 /// to help narrow the word list down & enable smarter ordering
-/// 
+///
 /// So. Here's the plan.
 /// - compute a Trie dictionary which contains _only_ possible words on the box, by considering
 ///   the following constraints:
@@ -18,8 +18,8 @@ struct _DictionaryByLength(HashMap<char, Vec<String>>);
 impl _DictionaryByLength {
     /// Sorts all the letters in the dict by length. should be called once after everything's added.
     fn sort(&mut self) {
-        for (c, words) in self.0.iter_mut() {
-            words.sort_unstable_by(|w1, w2| w2.len().cmp(&w1.len()));     
+        for words in self.0.values_mut() {
+            words.sort_unstable_by(|w1, w2| w2.len().cmp(&w1.len()));
         }
     }
 
@@ -27,12 +27,12 @@ impl _DictionaryByLength {
         let first_letter = word.chars().next().expect("Shouldn't get an empty word here.");
         self.0.entry(first_letter).or_insert(Vec::<String>::new()).push(word);
     }
-    
+
     /// get all entries under a given letter, or a flattened version with all words.
     fn get(&self, c: &char) -> Option<&Vec<String>> {
         self.0.get(c)
     }
-    
+
     /// get a not-necessarily-sorted flat version of all words in the dictionary.
     fn get_flat(&self) -> Vec<String> {
         let mut flattened: Vec<String> = Vec::new();
@@ -52,14 +52,14 @@ impl _DictionaryByLength {
 ///     - words are >3 letters
 fn precompute_dict_naive<const L: usize, const S: usize>(puzzle: &LBPuzzle<L, S>) -> (_DictionaryByLength, u32) {
     let reader = dictionary::get_dictionary_file_reader();
-    
+
     // precompute valid word hashes
     let mut side_to_valids: Vec<HashSet<char>> = Vec::new();
     for side_i in 0..S {
         side_to_valids.push(puzzle.valid_letters((side_i * L) as i32))
     }
     let all_valids = puzzle.valid_letters(-1);
-    
+
     let idx_to_valids = | idx: i32 | {
         side_to_valids.get(idx as usize / L).unwrap_or(&all_valids)
     };
@@ -76,7 +76,7 @@ fn precompute_dict_naive<const L: usize, const S: usize>(puzzle: &LBPuzzle<L, S>
         let word = line.unwrap();
         let word = word.trim();
         if word.len() > longest_word { longest_word = word.len(); }
-        
+
         // evaluate the conditions described above
         if word.len() < 3 { continue 'lines; }
         let mut prev_letter_idx = -1;
@@ -84,7 +84,7 @@ fn precompute_dict_naive<const L: usize, const S: usize>(puzzle: &LBPuzzle<L, S>
             if !idx_to_valids(prev_letter_idx).contains(&letter) {
                 continue 'lines;
             }
-            // todo make valids a map to index so i don't have to do this 
+            // todo make valids a map to index so i don't have to do this
             prev_letter_idx = word.chars().position(|c| c == letter).expect("letter must exist") as i32;
         }
         // if we get here, the word is valid
@@ -113,7 +113,7 @@ mod tests {
 
         assert!(n_words < 370104);
     }
-    
+
     #[test]
     fn test_order_letters() {
         // todo
@@ -129,15 +129,15 @@ fn _solve_helper<const L: usize, const S: usize>(dict: &_DictionaryByLength, puz
     // base cases:
     // we've run out of words
     if words.len() > puzzle.max_words { return None; };
-    
+
     println!("Evaluating {:?}", words);
-    
+
     // we've got a solution!
     if puzzle.validate_coverage(&words) {
         return Some(words);
     }
-    
-    // collect all the words that start with the ending letter of the previous word. 
+
+    // collect all the words that start with the ending letter of the previous word.
     // if there's no last word (ie this is the first call), then just use all words
     let matching_words = match words.last() {
         None => &dict.get_flat(),
@@ -149,15 +149,19 @@ fn _solve_helper<const L: usize, const S: usize>(dict: &_DictionaryByLength, puz
             words.unwrap()
         }
     };
-    
+
     // now go through all those words & see if they make a solution.
     for word in matching_words {
+        if words.contains(&word) {
+            // we don't want any repeat words, cuz they're useless
+            continue;
+        }
         let mut new_words = words.clone() as LBPuzzleSolution;
         new_words.push(word.clone());
         let soln = _solve_helper(dict, puzzle, new_words);
         // return if we've found something! we are greedy.
         if soln.is_some() { return soln;}
     };
-    
+
     None
 }
