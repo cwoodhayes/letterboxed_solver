@@ -3,25 +3,25 @@
 /// 
 
 pub mod brute_force;
+pub mod pre_dict;
 
 mod dictionary {
     use std::fs::File;
-    use std::io::{self, BufRead};
-    use std::path::{PathBuf, Path};
+    use std::io::{BufRead, BufReader};
+    use std::path::{Path};
     use trie_rs::{TrieBuilder, Trie};
 
-    fn get_dictionary_file_path() -> PathBuf {
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("resources/words_alpha.txt")
+    pub fn get_dictionary_file_reader() -> BufReader<File> {
+        println!("Loading English dictionary from file...");
+        let p = Path::new(env!("CARGO_MANIFEST_DIR")).join("resources/words_alpha.txt");
+        let file = File::open(p).unwrap();
+
+        // Create a buffered reader
+        BufReader::new(file)
     }
 
     pub fn load_trie_dictionary() -> (Trie<u8>, u32) {
-        // load the dictionary file
-        // Open the file
-        println!("Loading English dictionary from file into trie...");
-        let file = File::open(get_dictionary_file_path()).unwrap();
-
-        // Create a buffered reader
-        let reader = io::BufReader::new(file);
+        let reader = get_dictionary_file_reader();
         
         let mut words = TrieBuilder::<u8>::new();
         let mut n_words: u32 = 0;

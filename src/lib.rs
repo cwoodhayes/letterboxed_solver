@@ -108,7 +108,15 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
 
         letters
     }
-
+    
+    /// quick & easy validation that a given solution actually touches all the letters
+    /// doesn't check any of the other characteristics of a valid solution.
+    pub fn validate_coverage(&self, solution: &LBPuzzleSolution) -> bool {
+        let sol_letters: HashSet<char> = solution.iter().flat_map(|s| s.chars()).collect();
+        let puz_letters = self.valid_letters(-1);
+        sol_letters == puz_letters
+    }
+    
     /// See if we can solve the puzzle given a solution
     pub fn validate_solution(&self, solution: &LBPuzzleSolution) -> Result<()> {
         // for NYT, all words must be 3 letters or more, so check that
