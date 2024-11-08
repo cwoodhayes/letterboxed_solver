@@ -1,4 +1,3 @@
-use std::collections::{HashMap, HashSet};
 /// Solver where a more specific dictionary is precomputed
 /// to help narrow the word list down & enable smarter ordering
 ///
@@ -9,8 +8,8 @@ use std::collections::{HashMap, HashSet};
 ///     - letters can only be followed by letters on the other sides
 /// - start exploring the solution tree, _starting with the longest words in the dictionary_.
 
-use std::io::BufRead;
-use trie_rs::iter::KeysExt;
+use std::collections::{HashMap, HashSet};
+use std::io::{self, BufRead};
 use crate::{LBPuzzle, LBPuzzleSolution};
 use super::dictionary;
 
@@ -51,7 +50,7 @@ impl _SmartDictionary {
     ///     - only letters which are on the box can be included
     ///     - letters can only be followed by letters on the other sides
     ///     - words are >3 letters
-    fn new<const L: usize, const S: usize>(puzzle: &LBPuzzle<L, S>) -> Self {
+    fn new<const S: usize, const L: usize>(puzzle: &LBPuzzle<S, L>) -> Self {
 
         let reader = dictionary::get_dictionary_file_reader();
 
@@ -75,8 +74,8 @@ impl _SmartDictionary {
         'lines: for line in reader.lines() {
             // Add each word to the set (unwrap here for simplicity, but in practice handle errors)
             n_words += 1;
-            let word = line.unwrap();
-            let word = word.trim();
+            let line = line.unwrap();
+            let word = line.trim();
             if word.len() > longest_word { longest_word = word.len(); }
 
             // evaluate the conditions described above
@@ -87,7 +86,11 @@ impl _SmartDictionary {
                     continue 'lines;
                 }
                 // todo make valids a map to index so i don't have to do this
-                prev_letter_idx = word.chars().position(|c| c == letter).expect("letter must exist") as i32;
+                let new_idx = puzzle.all_letters().chars().position(|c| c == letter).expect("letter must exist") as i32;
+                if new_idx == prev_letter_idx {
+                    println!("YELLO")
+                }
+                prev_letter_idx = new_idx;
             }
             // if we get here, the word is valid
             n_valid_words += 1;

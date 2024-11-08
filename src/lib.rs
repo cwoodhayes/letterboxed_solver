@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::fmt;
 use crate::LBPuzzleError::BadSolutionError;
 
 pub mod solvers;
@@ -31,6 +32,13 @@ type Result<T> = std::result::Result<T, LBPuzzleError<'static>>;
 /// just a square with 3 letters per side.
 pub type NYTBoxPuzzle = LBPuzzle<4, 3>;
 
+// Implement the Display trait for your struct
+impl <const S: usize, const L: usize> fmt::Display for LBPuzzle<S, L> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Define how the struct should be formatted as a string
+        write!(f, "\"{}\" (turns: {})", self.sides_to_string(), self.max_words)
+    }
+}
 
 impl <const S: usize, const L: usize> LBPuzzle<S, L> {
     pub fn new(max_words: usize, sides: [[char; L]; S]) -> Self {
@@ -56,6 +64,11 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
         }
         let puzzle = LBPuzzle::new(max_words, sides);
         Ok(puzzle)
+    }
+
+    fn sides_to_string(&self) -> String {
+        let out = self.sides().iter().fold("".to_string(), |acc, &s| format!("{} {}",acc, s.iter().collect::<String>()));
+        out.trim_start().to_string()
     }
 
     /// get a copy of sides

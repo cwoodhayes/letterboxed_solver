@@ -17,16 +17,16 @@ fn main() {
          return;
       }
    };
+   println!("\nPUZZLE: {}", puzzle);
 
    // solve!
    let solution = match pre_dict::solve_pre_dict(&puzzle) {
       Some(solution) => solution,
       None => {
-         println!("\nPUZZLE: {:?}", puzz_str);
          println!("No solution found! :(");
          return;
       }
    };
-   println!("\nPUZZLE: {} words for {:?}", max_words, puzz_str);
+   println!("\nPUZZLE: {}", puzzle);
    println!("SOLUTION: {:?}", solution);
 }
