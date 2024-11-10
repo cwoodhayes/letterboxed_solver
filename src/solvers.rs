@@ -4,7 +4,7 @@
 
 pub mod brute_force;
 pub mod pre_dict;
-mod a_star;
+pub mod a_star;
 
 mod dictionary {
     use std::fs::File;

@@ -22,9 +22,15 @@
 /// TODO: assess how good the solutions are. how often does it find optimal? will need to implement
 /// an exhaustive search, probably with dijkstra, to assess.
 
-use crate::solvers::pre_dict as pre_dict;
+use crate::solvers::pre_dict::smart_dict;
 use std::collections::{HashMap, HashSet};
 use std::collections::BinaryHeap;
 use std::io::{self, BufRead};
 use crate::{LBPuzzle, LBPuzzleSolution};
-use super::dictionary;
+
+pub fn solve_a_star<const L: usize,const S: usize>(puzzle: &LBPuzzle<L, S>) -> Option<LBPuzzleSolution> {
+    let dict = smart_dict::SmartDictionary::new(&puzzle);
+    
+    None
+}
+
