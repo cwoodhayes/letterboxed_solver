@@ -9,12 +9,14 @@
 /// - start exploring the solution tree, _starting with the longest words in the dictionary_.
 
 use crate::{LBPuzzle, LBPuzzleSolution};
+use log::debug;
 
 pub mod smart_dict {
     use std::io::BufRead;
     use crate::LBPuzzle;
     use crate::solvers::dictionary;
     use std::collections::{HashMap, HashSet};
+    use log::info;
 
     pub struct SmartDictionary(HashMap<char, Vec<String>>);
 
@@ -41,18 +43,18 @@ pub mod smart_dict {
         pub fn get_flat(&self) -> Vec<String> {
             self.0.iter().flat_map(|(_, words)| words.iter()).cloned().collect::<Vec<String>>()
         }
-        
+
         /// get a flat version of all words in the dictionary, WITH each word given an index
         /// these indices are stable unless you call _add() or _sort() (which are only used by new())
         /// TODO change to Vec<&String, usize>
         pub fn get_flat_indexed(&self) -> Vec<(usize, &String)> {
             // indexing scheme for all is just "whatever the index is in flat map
-            // TODO change to btree so we don't need to actually call get_flat() here & so 
+            // TODO change to btree so we don't need to actually call get_flat() here & so
             // ordering is semantic
             let noidx = self.0.iter().flat_map(|(_, words)| words.iter()).collect::<Vec<&String>>();
             noidx.iter().cloned().enumerate().collect()
         }
-        
+
         /// get all words under a letter, with each word given a globally unique index
         /// these indices are stable unless you call _add() or _sort() (which are only used by new())
         pub fn get_indexed(&self, c: char) -> Option<Vec<(usize, &String)>> {
@@ -95,8 +97,10 @@ pub mod smart_dict {
             // bookkeeping vars
             let mut dictionary = SmartDictionary(HashMap::new());
             let mut n_words: u32 = 0;
+            
             let mut n_valid_words: u32 = 0;
             let mut longest_word = 0;
+            
             // Iterate over the lines in the file
             'lines: for line in reader.lines() {
                 // Add each word to the set (unwrap here for simplicity, but in practice handle errors)
@@ -121,9 +125,11 @@ pub mod smart_dict {
                 dictionary._add_word(word.to_string());
             }
 
-            println!("Loaded ({}/{}) words (longest {}). Sorting...", n_valid_words, n_words, longest_word);
+            # [cfg(debug_assertions)]
+            info!("Loaded ({}/{}) words (longest {}). Sorting...", n_valid_words, n_words, longest_word);
             dictionary._sort();
-            println!("Dictionary built.");
+            # [cfg(debug_assertions)]
+            info!("Dictionary built.");
 
             dictionary
         }
@@ -135,13 +141,13 @@ pub mod smart_dict {
 #[cfg(test)]
 mod tests {
     use crate::NYTBoxPuzzle;
-    use crate::solvers::pre_dict::{smart_dict, smart_dict::SmartDictionary};
+    use crate::solvers::pre_dict::{smart_dict::SmartDictionary};
 
     #[test]
     fn test_precompute_dictionary() {
         let nov_6_2024 = NYTBoxPuzzle::from_str(6, "erb uln imk jav").unwrap();
         // just make sure the load function actually runs and the hashset size is correct
-        let dict = smart_dict::SmartDictionary::new(&nov_6_2024);
+        let dict = SmartDictionary::new(&nov_6_2024);
 
         assert!(dict.len() < 370104);
     }
@@ -162,7 +168,7 @@ fn _solve_helper<const L: usize, const S: usize>(dict: &smart_dict::SmartDiction
     // we've run out of words
     if words.len() > puzzle.max_words { return None; };
 
-    println!("Evaluating {:?}", words);
+    debug!("Evaluating {:?}", words);
 
     // we've got a solution!
     if puzzle.validate_coverage(&words) {

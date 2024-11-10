@@ -25,6 +25,7 @@
 use std::collections::{BTreeSet};
 use std::hash::{Hash};
 use pathfinding::prelude::astar;
+use log::{debug, info};
 
 use crate::solvers::pre_dict::smart_dict;
 use crate::{LBPuzzle, LBPuzzleSolution};
@@ -34,22 +35,23 @@ use crate::{LBPuzzle, LBPuzzleSolution};
 struct Vertex {
     letter: Option<char>,   // start character is None, all else has Some
     coverage: BTreeSet<char>,
-    
+
     _words_path: Option<Vec<usize>>   // list of dictionary indices representing the words used
 }
 
 impl Vertex {
     fn new(letter: Option<char>, coverage: BTreeSet<char>, words_path: Option<Vec<usize>>) -> Self {
         let new = Self { letter, coverage, _words_path: words_path };
-        println!("{:?}", new);
+        // # [cfg(debug_assertions)]
+        debug!("{:?}", new);
         new
     }
-    
+
     /// gets a new start vertex
     fn new_start() -> Self {
         Vertex::new(None, BTreeSet::new(), None)
     }
-    
+
     /// returns all successor nodes, i.e. ending letters & coverages for all words with this starting letter
     fn successors<const L: usize, const S: usize>(&self, dict: &smart_dict::SmartDictionary, puzzle: &LBPuzzle<L,S>) -> Option<Vec<(Self, u32)>> {
         // BASE CASE: we've visited the max number of words
@@ -76,7 +78,7 @@ impl Vertex {
                 None => Vec::new()
             };
             words_path.push(idx);
-            
+
             let v = Vertex::new(
                 w.chars().last(),
                 coverage,
@@ -123,13 +125,13 @@ pub fn solve_a_star<const L: usize,const S: usize>(puzzle: &LBPuzzle<L, S>) -> O
         }
         None => None
     };
-    println!("solution: {:?}", &path);
-    println!("Nodes visited: {} | Edges traversed: {}", n_nodes_visited, n_edges_traversed);
-    
+    info!("solution: {:?}", &path);
+    info!("Nodes visited: {} | Edges traversed: {}", n_nodes_visited, n_edges_traversed);
+
     // convert from index path to words
     let idx_path = path?.last()?._words_path.clone().expect("This should have length");
     let word_path: Vec<String> = idx_path.iter().map(|idx| dict.get_word_by_idx(*idx).unwrap()).collect();
-    println!("Word path: {:?}", word_path);
-    
+    info!("Word path: {:?}", word_path);
+
     Some(word_path)
 }
