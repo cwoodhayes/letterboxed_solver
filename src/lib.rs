@@ -32,7 +32,6 @@ type Result<T> = std::result::Result<T, LBPuzzleError<'static>>;
 /// just a square with 3 letters per side.
 pub type NYTBoxPuzzle = LBPuzzle<4, 3>;
 
-// Implement the Display trait for your struct
 impl <const S: usize, const L: usize> fmt::Display for LBPuzzle<S, L> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // Define how the struct should be formatted as a string
