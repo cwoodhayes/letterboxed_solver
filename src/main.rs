@@ -1,6 +1,6 @@
 use std::env;
 
-use letterboxed_solver::{NYTBoxPuzzle, solvers::pre_dict};
+use letterboxed_solver::{NYTBoxPuzzle, solvers::a_star};
 
 fn main() {
    let args: Vec<String> = env::args().collect();
@@ -20,7 +20,7 @@ fn main() {
    println!("\nPUZZLE: {}", puzzle);
 
    // solve!
-   let solution = match pre_dict::solve_pre_dict(&puzzle) {
+   let solution = match a_star::solve_a_star(&puzzle) {
       Some(solution) => solution,
       None => {
          println!("No solution found! :(");

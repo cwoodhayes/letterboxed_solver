@@ -4,6 +4,7 @@
 
 pub mod brute_force;
 pub mod pre_dict;
+pub mod a_star;
 
 mod dictionary {
     use log::debug;
