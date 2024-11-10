@@ -9,7 +9,6 @@
 /// - start exploring the solution tree, _starting with the longest words in the dictionary_.
 use crate::{LBPuzzle, LBPuzzleSolution};
 use log::debug;
-use std::rc;
 
 pub mod smart_dict {
     use crate::solvers::dictionary;
@@ -128,7 +127,7 @@ pub mod smart_dict {
 
     /// A dictionary which only contains the words & information we actually need to
     /// evaluate a specific puzzle.
-    pub(crate) struct SmartDictionary {
+    pub struct SmartDictionary {
         _map: HashMap<char, Vec<Rc<String>>>,
         _flat: Vec<(usize, Rc<String>)>,
     }
