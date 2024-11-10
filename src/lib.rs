@@ -1,6 +1,6 @@
+use crate::LBPuzzleError::BadSolutionError;
 use std::collections::HashSet;
 use std::fmt;
-use crate::LBPuzzleError::BadSolutionError;
 
 pub mod solvers;
 
@@ -14,7 +14,7 @@ pub struct LBPuzzle<const NSIDES: usize, const NLETTERS: usize> {
     // the max number of words allowed for a correct puzzle solution
     max_words: usize,
     // the letters in the puzzle, as a nested array of sides
-    sides: [[char; NLETTERS]; NSIDES]
+    sides: [[char; NLETTERS]; NSIDES],
 }
 
 #[derive(Debug, Clone)]
@@ -32,14 +32,19 @@ type Result<T> = std::result::Result<T, LBPuzzleError<'static>>;
 /// just a square with 3 letters per side.
 pub type NYTBoxPuzzle = LBPuzzle<4, 3>;
 
-impl <const S: usize, const L: usize> fmt::Display for LBPuzzle<S, L> {
+impl<const S: usize, const L: usize> fmt::Display for LBPuzzle<S, L> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // Define how the struct should be formatted as a string
-        write!(f, "\"{}\" (turns: {})", self.sides_to_string(), self.max_words)
+        write!(
+            f,
+            "\"{}\" (turns: {})",
+            self.sides_to_string(),
+            self.max_words
+        )
     }
 }
 
-impl <const S: usize, const L: usize> LBPuzzle<S, L> {
+impl<const S: usize, const L: usize> LBPuzzle<S, L> {
     pub fn new(max_words: usize, sides: [[char; L]; S]) -> Self {
         LBPuzzle { max_words, sides }
     }
@@ -66,7 +71,9 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
     }
 
     fn sides_to_string(&self) -> String {
-        let out = self.sides().iter().fold("".to_string(), |acc, &s| format!("{} {}",acc, s.iter().collect::<String>()));
+        let out = self.sides().iter().fold("".to_string(), |acc, &s| {
+            format!("{} {}", acc, s.iter().collect::<String>())
+        });
         out.trim_start().to_string()
     }
 
@@ -98,7 +105,7 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
     /// Return None if out of range.
     pub fn idx_to_side(&self, idx: i32) -> Option<i32> {
         if 0 <= idx && idx < Self::n_letters() as i32 {
-            return Some(idx / L as i32)
+            return Some(idx / L as i32);
         }
         None
     }
@@ -141,7 +148,9 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
         let mut flat_solution = solution.get(0).unwrap().clone();
         for word in &solution[1..] {
             if word.chars().next() != flat_solution.chars().last() {
-                return Err(BadSolutionError("Start & end letters don't match".to_string()));
+                return Err(BadSolutionError(
+                    "Start & end letters don't match".to_string(),
+                ));
             }
             flat_solution.push_str(&word[1..]);
         }
@@ -165,7 +174,10 @@ impl <const S: usize, const L: usize> LBPuzzle<S, L> {
                     continue 'letters;
                 }
             }
-            return Err(BadSolutionError(format!("Failed to find letter {}", letter)));
+            return Err(BadSolutionError(format!(
+                "Failed to find letter {}",
+                letter
+            )));
         }
 
         // make sure we visited all the letters
@@ -191,27 +203,17 @@ mod tests {
         let nov_6_2024 = NYTBoxPuzzle::from_str(6, "erb uln imk jav");
         let nov_6_2024 = nov_6_2024.unwrap();
         let valids = [
-            vec!(
-                "juvenile".to_string(),
-                "embark".to_string()
-            ),
-            vec!(
+            vec!["juvenile".to_string(), "embark".to_string()],
+            vec![
                 "murk".to_string(),
                 "kanji".to_string(),
-                "inviable".to_string()
-            )
+                "inviable".to_string(),
+            ],
         ];
         let invalids = [
-            vec!(
-                "poop".to_string()
-            ),
-            vec!(
-                "ju".to_string(),
-                "uv".to_string(),
-            ),
-            vec!(
-                "juvenile".to_string(),
-            ),
+            vec!["poop".to_string()],
+            vec!["ju".to_string(), "uv".to_string()],
+            vec!["juvenile".to_string()],
         ];
 
         for example in valids {
@@ -224,7 +226,6 @@ mod tests {
             println!("\n{:?}", result);
             assert!(result.is_err());
         }
-
     }
 
     #[test]
@@ -233,11 +234,11 @@ mod tests {
             ['e', 'r', 'b'],
             ['u', 'l', 'n'],
             ['i', 'm', 'k'],
-            ['j', 'a', 'v']
+            ['j', 'a', 'v'],
         ];
         let string_a = String::from("erb uln imk jav");
 
-        let puzzle = LBPuzzle::<4,3>::from_str(5, &string_a);
+        let puzzle = LBPuzzle::<4, 3>::from_str(5, &string_a);
 
         assert!(puzzle.is_ok());
         let puzzle = puzzle.unwrap();
@@ -247,7 +248,7 @@ mod tests {
 
     #[test]
     fn test_index_side() {
-        let puzzle = LBPuzzle::<4,3>::from_str(4, &"erb uln imk jav".to_string()).unwrap();
+        let puzzle = LBPuzzle::<4, 3>::from_str(4, &"erb uln imk jav".to_string()).unwrap();
         assert!(puzzle.is_idx_on_side(0, 0));
         assert!(puzzle.is_idx_on_side(3, 1));
         assert!(puzzle.is_idx_on_side(2, 0));
@@ -255,5 +256,4 @@ mod tests {
 
         assert_eq!(puzzle.idx_to_side(0).unwrap(), 0);
     }
-
 }

@@ -1,17 +1,16 @@
+pub mod a_star;
 /// Solvers for the puzzle
 /// & associated code
 ///
-
 pub mod brute_force;
 pub mod pre_dict;
-pub mod a_star;
 
 mod dictionary {
     use log::debug;
     use std::fs::File;
     use std::io::{BufRead, BufReader};
-    use std::path::{Path};
-    use trie_rs::{TrieBuilder, Trie};
+    use std::path::Path;
+    use trie_rs::{Trie, TrieBuilder};
 
     pub fn get_dictionary_file_reader() -> BufReader<File> {
         debug!("Loading English dictionary from file...");
@@ -24,7 +23,7 @@ mod dictionary {
 
     pub fn load_trie_dictionary() -> (Trie<u8>, u32) {
         let reader = get_dictionary_file_reader();
-        
+
         let mut words = TrieBuilder::<u8>::new();
         let mut n_words: u32 = 0;
         let mut longest_word = 0;
@@ -34,16 +33,21 @@ mod dictionary {
             n_words += 1;
             let word = line.unwrap();
             let word = word.trim();
-            if word.len() > longest_word { longest_word = word.len(); }
+            if word.len() > longest_word {
+                longest_word = word.len();
+            }
             words.push(word.to_string());
         }
-        debug!("Loaded {} words (longest {}). Building trie...", n_words, longest_word);
+        debug!(
+            "Loaded {} words (longest {}). Building trie...",
+            n_words, longest_word
+        );
         let words = words.build();
         debug!("Trie built.");
 
         (words, n_words)
     }
-    
+
     #[cfg(test)]
     mod tests {
         use crate::solvers::dictionary::load_trie_dictionary;
@@ -52,7 +56,7 @@ mod dictionary {
         fn test_load_trie_dictionary() {
             // just make sure the load function actually runs and the hashset size is correct
             let (_, n_words) = load_trie_dictionary();
-            
+
             assert_eq!(n_words, 370104);
         }
     }
