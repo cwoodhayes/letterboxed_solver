@@ -18,7 +18,7 @@ pub mod smart_dict {
     use std::io::BufRead;
     use std::rc::Rc;
 
-    struct _Builder(HashMap<char, Vec<Rc<String>>>);
+    pub(crate) struct _Builder(HashMap<char, Vec<Rc<String>>>);
 
     impl _Builder {
         /// Sorts all the letters in the dict by length. should be called once after everything's added.

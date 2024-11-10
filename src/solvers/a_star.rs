@@ -99,11 +99,20 @@ impl Vertex {
     }
 }
 
+/// Solves the puzzle using A* search.
 pub fn solve_a_star<const L: usize, const S: usize>(
     puzzle: &LBPuzzle<L, S>,
 ) -> Option<LBPuzzleSolution> {
     let dict = smart_dict::SmartDictionary::new(&puzzle);
+    _helper(&puzzle, &dict)
+}
 
+/// Helper function for A* search.
+/// broken out separately for benchmarking purposes.
+pub fn _helper<const L: usize, const S: usize>(
+    puzzle: &LBPuzzle<L, S>,
+    dict: &smart_dict::SmartDictionary,
+) -> Option<LBPuzzleSolution> {
     let start = Vertex::new_start();
     let mut n_nodes_visited: u64 = 0;
     let mut n_edges_traversed: u64 = 0;

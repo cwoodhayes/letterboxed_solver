@@ -19,6 +19,16 @@ fn benchmark_a_star(c: &mut Criterion) {
     });
 }
 
+fn benchmark_a_star_helper(c: &mut Criterion) {
+    let puzzle = get_nyt_example();
+    println!("{}", puzzle);
+    let dict = SmartDictionary::new(&puzzle);
+
+    c.bench_function("A* helper", |b| {
+        b.iter(|| a_star::_helper(black_box(&puzzle), black_box(&dict)));
+    });
+}
+
 fn benchmark_pre_dict_smart_dict(c: &mut Criterion) {
     let puzzle = get_nyt_example();
     println!("{}", puzzle);
@@ -28,5 +38,10 @@ fn benchmark_pre_dict_smart_dict(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, benchmark_a_star, benchmark_pre_dict_smart_dict);
+criterion_group!(
+    benches,
+    benchmark_a_star,
+    benchmark_pre_dict_smart_dict,
+    benchmark_a_star_helper
+);
 criterion_main!(benches);
