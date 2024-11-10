@@ -9,6 +9,7 @@
 /// - start exploring the solution tree, _starting with the longest words in the dictionary_.
 use crate::{LBPuzzle, LBPuzzleSolution};
 use log::debug;
+use std::rc;
 
 pub mod smart_dict {
     use crate::solvers::dictionary;
@@ -16,10 +17,11 @@ pub mod smart_dict {
     use log::info;
     use std::collections::{HashMap, HashSet};
     use std::io::BufRead;
+    use std::rc::Rc;
 
-    pub struct SmartDictionary(HashMap<char, Vec<String>>);
+    struct _Builder(HashMap<char, Vec<Rc<String>>>);
 
-    impl SmartDictionary {
+    impl _Builder {
         /// Sorts all the letters in the dict by length. should be called once after everything's added.
         fn _sort(&mut self) {
             for words in self.0.values_mut() {
@@ -34,66 +36,25 @@ pub mod smart_dict {
                 .expect("Shouldn't get an empty word here.");
             self.0
                 .entry(first_letter)
-                .or_insert(Vec::<String>::new())
-                .push(word);
-        }
-
-        /// get all entries under a given letter, or a flattened version with all words.
-        pub fn get(&self, c: char) -> Option<&Vec<String>> {
-            self.0.get(&c)
-        }
-
-        /// get a not-necessarily-sorted flat version of all words in the dictionary.
-        /// TODO change to Vec<&String> & cache result
-        pub fn get_flat(&self) -> Vec<String> {
-            self.0
-                .iter()
-                .flat_map(|(_, words)| words.iter())
-                .cloned()
-                .collect::<Vec<String>>()
+                .or_insert(Vec::<Rc<String>>::new())
+                .push(Rc::new(word));
         }
 
         /// get a flat version of all words in the dictionary, WITH each word given an index
         /// these indices are stable unless you call _add() or _sort() (which are only used by new())
-        /// TODO change to Vec<&String, usize>
-        pub fn get_flat_indexed(&self) -> Vec<(usize, &String)> {
+        pub fn get_flat_indexed(&self) -> Vec<(usize, Rc<String>)> {
             // indexing scheme for all is just "whatever the index is in flat map
-            // TODO change to btree so we don't need to actually call get_flat() here & so
-            // ordering is semantic
+            // TODO change to btree so ordering is semantic and we have indices more naturally
             let noidx = self
                 .0
                 .iter()
-                .flat_map(|(_, words)| words.iter())
-                .collect::<Vec<&String>>();
+                .flat_map(|(_, words)| words.iter().cloned())
+                .collect::<Vec<Rc<String>>>();
             noidx.iter().cloned().enumerate().collect()
         }
 
-        /// get all words under a letter, with each word given a globally unique index
-        /// these indices are stable unless you call _add() or _sort() (which are only used by new())
-        pub fn get_indexed(&self, c: char) -> Option<Vec<(usize, &String)>> {
-            // todo cache. ugh we gotta do this to keep the indexing the same. brutal.
-            let letter_words = self.get(c)?;
-            let letter_idx = self
-                .get_flat_indexed()
-                .into_iter()
-                .position(|(_, word)| *word == letter_words[0])?;
-            let out = self
-                .get(c)?
-                .iter()
-                .enumerate()
-                .map(|(idx, w)| (letter_idx + idx, w))
-                .collect();
-            Some(out)
-        }
-
-        /// get the word at a given stable index, per get_flat_indexed
-        pub fn get_word_by_idx(&self, idx: usize) -> Option<String> {
-            self.get_flat().get(idx).cloned()
-        }
-
-        /// get the total number of words in the dictionary
-        pub fn len(&self) -> usize {
-            self.0.values().fold(0, |acc, words| acc + words.len())
+        pub fn take_map(self) -> HashMap<char, Vec<Rc<String>>> {
+            self.0
         }
 
         /// Load in the words in the dictionary, but filter them such that:
@@ -114,7 +75,7 @@ pub mod smart_dict {
                 |idx: i32| side_to_valids.get(idx as usize / L).unwrap_or(&all_valids);
 
             // bookkeeping vars
-            let mut dictionary = SmartDictionary(HashMap::new());
+            let mut dictionary = Self(HashMap::new());
             let mut n_words: u32 = 0;
 
             let mut n_valid_words: u32 = 0;
@@ -162,6 +123,74 @@ pub mod smart_dict {
             info!("Dictionary built.");
 
             dictionary
+        }
+    }
+
+    /// A dictionary which only contains the words & information we actually need to
+    /// evaluate a specific puzzle.
+    pub(crate) struct SmartDictionary {
+        _map: HashMap<char, Vec<Rc<String>>>,
+        _flat: Vec<(usize, Rc<String>)>,
+    }
+
+    impl SmartDictionary {
+        /// create the smart dictionary object
+        pub fn new<const S: usize, const L: usize>(puzzle: &LBPuzzle<S, L>) -> Self {
+            let builder = _Builder::new(puzzle);
+
+            Self {
+                _flat: builder.get_flat_indexed(),
+                _map: builder.take_map(),
+            }
+        }
+
+        /// get all entries under a given letter, or a flattened version with all words.
+        pub fn get(&self, c: char) -> Option<&Vec<Rc<String>>> {
+            self._map.get(&c)
+        }
+
+        /// get a flat version of all words in the dictionary.
+        #[deprecated(since = "0.1.0", note = "use get_flat_indexed instead")]
+        pub fn get_flat(&self) -> Vec<Rc<String>> {
+            self._flat.iter().map(|(_, w)| w.clone()).collect()
+        }
+
+        /// get a flat version of all words in the dictionary alongside their indices
+        pub fn get_flat_indexed(&self) -> &Vec<(usize, Rc<String>)> {
+            // TODO change to btree so we don't need to actually call get_flat() here & so
+            // ordering is semantic
+            &self._flat
+        }
+
+        /// get all words under a letter, with each word given a globally unique index
+        /// these indices are stable unless you call _add() or _sort() (which are only used by new())
+        pub fn get_indexed(&self, c: char) -> Option<Vec<(usize, Rc<String>)>> {
+            // find the index of the first word under this letter in flat_indexed
+            let letter_words = self.get(c)?;
+            let first_idx = self
+                .get_flat_indexed()
+                .iter()
+                .position(|(_, w)| w == &letter_words[0])?;
+
+            // slice the flat vec to get the words under this letter
+            let out = self
+                ._flat
+                .iter()
+                .skip(first_idx)
+                .take(letter_words.len())
+                .cloned()
+                .collect();
+            Some(out)
+        }
+
+        /// get the word at a given stable index, per get_flat_indexed
+        pub fn get_word_by_idx(&self, idx: usize) -> Option<Rc<String>> {
+            Some(self.get_flat_indexed()[idx].1.clone())
+        }
+
+        /// get the total number of words in the dictionary
+        pub fn len(&self) -> usize {
+            self._flat.len()
         }
     }
 }
@@ -236,7 +265,7 @@ fn _solve_helper<const L: usize, const S: usize>(
             continue;
         }
         let mut new_words = words.clone() as LBPuzzleSolution;
-        new_words.push(word.clone());
+        new_words.push((*word).as_ref().clone());
         let soln = _solve_helper(dict, puzzle, new_words);
         // return if we've found something! we are greedy.
         if soln.is_some() {
