@@ -51,7 +51,11 @@ impl Vertex {
     }
     
     /// returns all successor nodes, i.e. ending letters & coverages for all words with this starting letter
-    fn successors(&self, dict: &smart_dict::SmartDictionary) -> Vec<(Self, u32)> {
+    fn successors<const L: usize, const S: usize>(&self, dict: &smart_dict::SmartDictionary, puzzle: &LBPuzzle<L,S>) -> Option<Vec<(Self, u32)>> {
+        // BASE CASE: we've visited the max number of words
+        if self._words_path.clone().unwrap_or_default().len() == puzzle.max_words {
+            return None
+        }
         // gather all dictionary words that start with this letter
         let next_words = match self.letter {
             Some(l_) => dict.get_indexed(l_).unwrap_or(Vec::new()),
@@ -59,14 +63,16 @@ impl Vertex {
         };
 
         // for each, construct the next vertex & assign an edge weight & return
-        next_words.into_iter().map(|(idx, w)| -> (Self, u32) {
+        let successors = next_words.into_iter().map(|(idx, w)| -> (Self, u32) {
             // coverage(v) = coverage(v') + coverage(e)
             // i could do something clever here to save memory by caching identical coverages.
             // we'll see if we need it.
             let coverage_e: BTreeSet<char> = w.chars().collect();
             let coverage = self.coverage.union(&coverage_e).cloned().collect();
             let mut words_path = match &self._words_path {
-                Some(p) => p.clone(),
+                Some(p) => {
+                    p.clone()
+                },
                 None => Vec::new()
             };
             words_path.push(idx);
@@ -77,7 +83,8 @@ impl Vertex {
                 Some(words_path)
             );
             (v, 1) // all edges are weight 1
-        }).collect()
+        }).collect();
+        Some(successors)
     }
 
     /// h(v) = (L*S) - coverage(v)
@@ -98,7 +105,7 @@ pub fn solve_a_star<const L: usize,const S: usize>(puzzle: &LBPuzzle<L, S>) -> O
        &start,
        |v| {
            n_nodes_visited += 1;
-           v.successors(&dict)
+           v.successors(&dict, puzzle).unwrap_or(Vec::new())
        },
        |v| {
            n_edges_traversed += 1;
@@ -107,12 +114,13 @@ pub fn solve_a_star<const L: usize,const S: usize>(puzzle: &LBPuzzle<L, S>) -> O
        |v| v.heuristic(&puzzle) == 0
     );
     let path = match result {
-        Some((path, n_words)) => {
-            if path.len() != (n_words+1) as usize {
-                panic!("word len ({n_words}) != path len ({}) -- the algo isn't working right", path.len());
+        Some((path, cost)) => {
+            if (path.len() - 1) != cost as usize {
+                // path is 1 node longer than cost (aka n_words) because of the start node.
+                panic!("word len ({cost}) != path len ({}) -- the algo isn't working right", path.len());
             }
             Some(path)
-        },
+        }
         None => None
     };
     println!("solution: {:?}", &path);
