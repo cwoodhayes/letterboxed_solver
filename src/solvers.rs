@@ -1,18 +1,19 @@
 /// Solvers for the puzzle
 /// & associated code
-/// 
+///
 
 pub mod brute_force;
 pub mod pre_dict;
 
 mod dictionary {
+    use log::debug;
     use std::fs::File;
     use std::io::{BufRead, BufReader};
     use std::path::{Path};
     use trie_rs::{TrieBuilder, Trie};
 
     pub fn get_dictionary_file_reader() -> BufReader<File> {
-        println!("Loading English dictionary from file...");
+        debug!("Loading English dictionary from file...");
         let p = Path::new(env!("CARGO_MANIFEST_DIR")).join("resources/words_alpha.txt");
         let file = File::open(p).unwrap();
 
@@ -35,9 +36,9 @@ mod dictionary {
             if word.len() > longest_word { longest_word = word.len(); }
             words.push(word.to_string());
         }
-        println!("Loaded {} words (longest {}). Building trie...", n_words, longest_word);
+        debug!("Loaded {} words (longest {}). Building trie...", n_words, longest_word);
         let words = words.build();
-        println!("Trie built.");
+        debug!("Trie built.");
 
         (words, n_words)
     }

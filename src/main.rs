@@ -13,7 +13,7 @@ fn main() {
    let puzzle = match NYTBoxPuzzle::from_str(max_words, &puzz_str) {
       Ok(puzzle) => puzzle,
       Err(e) => {
-         println!("Invalid puzzle! Error: {:?}", e);
+         eprintln!("Invalid puzzle! Error: {:?}", e);
          return;
       }
    };
