@@ -242,6 +242,7 @@ fn _solve_helper<const L: usize, const S: usize>(
     // collect all the words that start with the ending letter of the previous word.
     // if there's no last word (ie this is the first call), then just use all words
     let matching_words = match words.last() {
+        #[allow(deprecated)]
         None => &dict.get_flat(),
         Some(word) => {
             let last_char = word
