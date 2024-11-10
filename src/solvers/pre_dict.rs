@@ -122,8 +122,10 @@ pub mod smart_dict {
                 dictionary._add_word(word.to_string());
             }
 
+            # [cfg(debug_assertions)]
             println!("Loaded ({}/{}) words (longest {}). Sorting...", n_valid_words, n_words, longest_word);
             dictionary._sort();
+            # [cfg(debug_assertions)]
             println!("Dictionary built.");
 
             dictionary
