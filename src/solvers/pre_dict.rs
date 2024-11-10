@@ -1,4 +1,3 @@
-use log::debug;
 /// Solver where a more specific dictionary is precomputed
 /// to help narrow the word list down & enable smarter ordering
 ///
@@ -10,12 +9,14 @@ use log::debug;
 /// - start exploring the solution tree, _starting with the longest words in the dictionary_.
 
 use crate::{LBPuzzle, LBPuzzleSolution};
+use log::debug;
 
 pub mod smart_dict {
     use std::io::BufRead;
     use crate::LBPuzzle;
     use crate::solvers::dictionary;
     use std::collections::{HashMap, HashSet};
+    use log::info;
 
     pub struct SmartDictionary(HashMap<char, Vec<String>>);
 
@@ -96,8 +97,10 @@ pub mod smart_dict {
             // bookkeeping vars
             let mut dictionary = SmartDictionary(HashMap::new());
             let mut n_words: u32 = 0;
+            
             let mut n_valid_words: u32 = 0;
             let mut longest_word = 0;
+            
             // Iterate over the lines in the file
             'lines: for line in reader.lines() {
                 // Add each word to the set (unwrap here for simplicity, but in practice handle errors)
@@ -123,10 +126,10 @@ pub mod smart_dict {
             }
 
             # [cfg(debug_assertions)]
-            println!("Loaded ({}/{}) words (longest {}). Sorting...", n_valid_words, n_words, longest_word);
+            info!("Loaded ({}/{}) words (longest {}). Sorting...", n_valid_words, n_words, longest_word);
             dictionary._sort();
             # [cfg(debug_assertions)]
-            println!("Dictionary built.");
+            info!("Dictionary built.");
 
             dictionary
         }
@@ -138,13 +141,13 @@ pub mod smart_dict {
 #[cfg(test)]
 mod tests {
     use crate::NYTBoxPuzzle;
-    use crate::solvers::pre_dict::{smart_dict, smart_dict::SmartDictionary};
+    use crate::solvers::pre_dict::{smart_dict::SmartDictionary};
 
     #[test]
     fn test_precompute_dictionary() {
         let nov_6_2024 = NYTBoxPuzzle::from_str(6, "erb uln imk jav").unwrap();
         // just make sure the load function actually runs and the hashset size is correct
-        let dict = smart_dict::SmartDictionary::new(&nov_6_2024);
+        let dict = SmartDictionary::new(&nov_6_2024);
 
         assert!(dict.len() < 370104);
     }

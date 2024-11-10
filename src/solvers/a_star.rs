@@ -42,7 +42,7 @@ struct Vertex {
 impl Vertex {
     fn new(letter: Option<char>, coverage: BTreeSet<char>, words_path: Option<Vec<usize>>) -> Self {
         let new = Self { letter, coverage, _words_path: words_path };
-        # [cfg(debug_assertions)]
+        // # [cfg(debug_assertions)]
         debug!("{:?}", new);
         new
     }

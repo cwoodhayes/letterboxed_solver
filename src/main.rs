@@ -1,8 +1,12 @@
 use std::env;
+use log::debug;
+use env_logger::Env;
 
 use letterboxed_solver::{NYTBoxPuzzle, solvers::a_star};
 
 fn main() {
+   env_logger::Builder::from_env(Env::default().default_filter_or("warn")).init();
+   
    let args: Vec<String> = env::args().collect();
    if args.len() != 3 {
       eprintln!("Usage: letterboxed_solver [puzzle string] [max # of words]");
@@ -17,13 +21,13 @@ fn main() {
          return;
       }
    };
-   println!("\nPUZZLE: {}", puzzle);
+   debug!("\nPUZZLE: {}", puzzle);
 
    // solve!
    let solution = match a_star::solve_a_star(&puzzle) {
       Some(solution) => solution,
       None => {
-         println!("No solution found! :(");
+         eprintln!("No solution found! :(");
          return;
       }
    };
