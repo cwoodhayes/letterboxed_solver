@@ -1,47 +1,47 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use letterboxed_solver::solvers::{a_star, brute_force, pre_dict};
-use letterboxed_solver::{LBPuzzle, NYTBoxPuzzle};
+use letterboxed_solver::solvers::a_star;
+use letterboxed_solver::solvers::pre_dict::smart_dict::SmartDictionary;
+use letterboxed_solver::NYTBoxPuzzle; // Ensure this path is correct
 
 fn get_nyt_example() -> NYTBoxPuzzle {
     // nov_6_2024
     NYTBoxPuzzle::from_str(6, "erb uln imk jav").unwrap()
 }
 
-fn benchmark_brute_force(c: &mut Criterion) {
-    let nov_6_2024 = get_nyt_example();
-    println!("{:?}", nov_6_2024);
-
-    c.bench_function("my_function", |b| {
-        b.iter(|| {
-            let result = brute_force::solve_brute_force(black_box(&nov_6_2024));
-            dbg!(&result);
-        })
-    });
-}
-
-fn benchmark_pre_dict(c: &mut Criterion) {
-    let nov_6_2024 = get_nyt_example();
-    println!("{:?}", nov_6_2024);
-
-    c.bench_function("my_function", |b| {
-        b.iter(|| {
-            let result = pre_dict::solve_pre_dict(black_box(&nov_6_2024));
-            dbg!(&result);
-        })
-    });
-}
-
 fn benchmark_a_star(c: &mut Criterion) {
     let puzzle = get_nyt_example();
     println!("{}", puzzle);
 
-    c.bench_function("a star", |b| {
+    c.bench_function("A* solver", |b| {
         b.iter(|| {
             a_star::solve_a_star(black_box(&puzzle));
         })
     });
 }
 
-// a star is the only one i care about
-criterion_group!(benches, benchmark_a_star);
+fn benchmark_a_star_helper(c: &mut Criterion) {
+    let puzzle = get_nyt_example();
+    println!("{}", puzzle);
+    let dict = SmartDictionary::new(&puzzle);
+
+    c.bench_function("A* helper", |b| {
+        b.iter(|| a_star::_helper(black_box(&puzzle), black_box(&dict)));
+    });
+}
+
+fn benchmark_pre_dict_smart_dict(c: &mut Criterion) {
+    let puzzle = get_nyt_example();
+    println!("{}", puzzle);
+
+    c.bench_function("building smart dict", |b| {
+        b.iter(|| SmartDictionary::new(black_box(&puzzle)));
+    });
+}
+
+criterion_group!(
+    benches,
+    benchmark_a_star,
+    benchmark_pre_dict_smart_dict,
+    benchmark_a_star_helper
+);
 criterion_main!(benches);

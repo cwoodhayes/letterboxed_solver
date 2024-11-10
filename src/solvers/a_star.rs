@@ -18,6 +18,7 @@ use pathfinding::prelude::astar;
 /// our heuristic(s):
 /// - (L*S) - |coverage(v)|.  We could be smarter and prefer easier letters to hard ones (maybe use
 ///   scrabble letter values?), but this is a good option to start with.
+///   just for fun, let's tiebreak on shorter words so we get a crisper looking solution.
 ///
 /// our search will be constrained such that we will not traverse more than max_words edges.
 ///
@@ -67,7 +68,7 @@ impl Vertex {
         // gather all dictionary words that start with this letter
         let next_words = match self.letter {
             Some(l_) => dict.get_indexed(l_).unwrap_or(Vec::new()),
-            None => dict.get_flat_indexed(),
+            None => dict.get_flat_indexed().clone(),
         };
 
         // for each, construct the next vertex & assign an edge weight & return
@@ -98,11 +99,20 @@ impl Vertex {
     }
 }
 
+/// Solves the puzzle using A* search.
 pub fn solve_a_star<const L: usize, const S: usize>(
     puzzle: &LBPuzzle<L, S>,
 ) -> Option<LBPuzzleSolution> {
     let dict = smart_dict::SmartDictionary::new(&puzzle);
+    _helper(&puzzle, &dict)
+}
 
+/// Helper function for A* search.
+/// broken out separately for benchmarking purposes.
+pub fn _helper<const L: usize, const S: usize>(
+    puzzle: &LBPuzzle<L, S>,
+    dict: &smart_dict::SmartDictionary,
+) -> Option<LBPuzzleSolution> {
     let start = Vertex::new_start();
     let mut n_nodes_visited: u64 = 0;
     let mut n_edges_traversed: u64 = 0;
@@ -146,7 +156,7 @@ pub fn solve_a_star<const L: usize, const S: usize>(
         .expect("This should have length");
     let word_path: Vec<String> = idx_path
         .iter()
-        .map(|idx| dict.get_word_by_idx(*idx).unwrap())
+        .map(|idx| dict.get_word_by_idx(*idx).unwrap().as_ref().clone())
         .collect();
     info!("Word path: {:?}", word_path);
 
