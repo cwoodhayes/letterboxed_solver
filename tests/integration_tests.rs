@@ -1,7 +1,7 @@
 // basic integration tests for the module
 
 // define some example input structs
-use letterboxed_solver::solvers::{brute_force, pre_dict, a_star};
+use letterboxed_solver::solvers::{a_star, brute_force, pre_dict};
 use letterboxed_solver::NYTBoxPuzzle;
 
 // todo: sure would be nice if I could have a helper function to test any algo...
@@ -37,7 +37,7 @@ fn test_pre_dict() {
         println!("TEST CASE: {}", puzzle);
 
         let solution = pre_dict::solve_pre_dict(&puzzle);
-        
+
         assert!(solution.is_some());
         let solution = solution.unwrap();
         println!("{:?}", solution);
