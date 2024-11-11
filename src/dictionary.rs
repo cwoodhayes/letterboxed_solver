@@ -14,11 +14,11 @@ pub fn get_dictionary_from_file(path: &str) -> BufReader<File> {
 }
 
 pub fn get_dictionary_file_reader() -> BufReader<File> {
-    get_dictionary_from_file("5000_common.txt")
+    get_dictionary_from_file("google_10000_english.txt")
 }
 
 pub fn load_trie_dictionary() -> (Trie<u8>, u32) {
-    let reader = get_dictionary_file_reader();
+    let reader = get_dictionary_from_file("5000_common.txt");
 
     let mut words = TrieBuilder::<u8>::new();
     let mut n_words: u32 = 0;
@@ -53,7 +53,7 @@ mod tests {
         // just make sure the load function actually runs and the hashset size is correct
         let (_, n_words) = load_trie_dictionary();
 
-        assert_eq!(n_words, 370104);
+        assert_eq!(n_words, 5000);
     }
 }
 
