@@ -7,16 +7,19 @@ I made it as a simple fun project to learn to write Rust, so
 my priority has been more towards my own learning than towards
 general cleanliness.  
 
-Currently it doesn't generate the _best_ solution; just _a_ solution.
+By default, the CLI utility uses A* to find an optimal solution. However, my A* implementation is configurable to
+find suboptimal solutions for quicker runs.
 Also I don't have access to the same dictionary as NYT uses, so sometimes
 the words here aren't included there :)
 
 ## Usage
 ```bash
-# solve the puzzle from Nov 7, 2024, which allows 5 words
-letterboxed_solver "vro wal eth bdi" 5
-# output is something like:
-# SOLUTION: ["iliahi", "iliad", "deliverable", "elbowboard", "deverbative"]
+conor@co:~$ # solve the puzzle from Nov 7, 2024, which allows 5 words
+conor@pc:~$ cargo run "vro wal eth bdi" 5
+
+PUZZLE: "vro wal eth bdi" (turns: 5)
+SOLUTION: ["whiled", "driveboat"]
+
 ```
 
 ## Credits
@@ -26,4 +29,4 @@ My dictionary of english words was taken from
 I put this together once I got through Ch. 14 of 
 [The Rust Programming Language](https://doc.rust-lang.org/book/title-page.html).
 
-And thanks to my partner berit for getting me into all these NYT puzzles :)
+Also thanks to my partner berit for getting me into all these NYT puzzles :)
