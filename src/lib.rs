@@ -2,6 +2,7 @@ use crate::LBPuzzleError::BadSolutionError;
 use std::collections::HashSet;
 use std::fmt;
 
+pub mod dictionary;
 pub mod solvers;
 
 /// Top-level representation of a puzzle definition.

@@ -1,4 +1,4 @@
-use crate::solvers::dictionary::load_trie_dictionary;
+use crate::dictionary::load_trie_dictionary;
 use crate::{LBPuzzle, LBPuzzleSolution};
 use std::collections::{HashSet, VecDeque};
 use trie_rs::Trie;
