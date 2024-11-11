@@ -14,7 +14,7 @@ the words here aren't included there :)
 
 ## Usage
 ```bash
-conor@co:~$ # solve the puzzle from Nov 7, 2024, which allows 5 words
+conor@pc:~$ # solve the puzzle from Nov 7, 2024, which allows 5 words
 conor@pc:~$ cargo run "vro wal eth bdi" 5
 
 PUZZLE: "vro wal eth bdi" (turns: 5)
