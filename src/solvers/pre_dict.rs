@@ -14,10 +14,10 @@ use log::debug;
 
 use super::SolverStrategy;
 
-pub struct PreDictSolver {}
+pub struct PreDictSolver<const L: usize, const S: usize> {}
 
-impl SolverStrategy for PreDictSolver {
-    fn solve<const L: usize, const S: usize>(puzzle: &LBPuzzle<L, S>) -> Option<LBPuzzleSolution> {
+impl<const L: usize, const S: usize> SolverStrategy<L, S> for PreDictSolver<L, S> {
+    fn solve(&self, puzzle: &LBPuzzle<L, S>) -> Option<LBPuzzleSolution> {
         let dict = smart_dict::SmartDictionary::new(&puzzle);
         _solve_helper(&dict, puzzle, LBPuzzleSolution::new())
     }

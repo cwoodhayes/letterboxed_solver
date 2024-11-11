@@ -21,7 +21,8 @@ fn test_brute_force() {
     for puzzle in get_test_puzzles() {
         println!("TEST CASE: {}", puzzle);
 
-        let solution = brute_force::BruteForceSolver::solve(&puzzle);
+        let solver = brute_force::BruteForceSolver {};
+        let solution = solver.solve(&puzzle);
 
         assert!(solution.is_some());
         let solution = solution.unwrap();
@@ -36,7 +37,8 @@ fn test_pre_dict() {
     for puzzle in get_test_puzzles() {
         println!("TEST CASE: {}", puzzle);
 
-        let solution = pre_dict::PreDictSolver::solve(&puzzle);
+        let solver = pre_dict::PreDictSolver {};
+        let solution = solver.solve(&puzzle);
 
         assert!(solution.is_some());
         let solution = solution.unwrap();
@@ -50,7 +52,8 @@ fn test_a_star() {
     for puzzle in get_test_puzzles() {
         println!("TEST CASE: {}", puzzle);
 
-        let solution = a_star::AStarSolver::solve(&puzzle);
+        let solver = a_star::AStarSolver::new(1.0);
+        let solution = solver.solve(&puzzle);
 
         assert!(solution.is_some());
         let solution = solution.unwrap();

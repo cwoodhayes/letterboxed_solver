@@ -44,10 +44,10 @@ impl _Solution {
 /// no dynamic programming, no clever optimizations, no nothing. Just a ton of wasted memory on string allocs.
 /// it doesn't try to find the best solution; it just returns the first valid solution
 /// it can find by doing recursive breadth-first search on the entire tree of possibilities.
-pub struct BruteForceSolver {}
+pub struct BruteForceSolver<const L: usize, const S: usize> {}
 
-impl SolverStrategy for BruteForceSolver {
-    fn solve<const L: usize, const S: usize>(puzzle: &LBPuzzle<L, S>) -> Option<LBPuzzleSolution> {
+impl<const L: usize, const S: usize> SolverStrategy<L, S> for BruteForceSolver<L, S> {
+    fn solve(&self, puzzle: &LBPuzzle<L, S>) -> Option<LBPuzzleSolution> {
         let (dict, _) = load_trie_dictionary();
 
         // may need to use linked list here instead due to allocating a huge block of contiguous mem but we'll see

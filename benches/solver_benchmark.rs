@@ -17,10 +17,11 @@ fn get_smart_dict(puzzle: &NYTBoxPuzzle) -> SmartDictionary {
 fn benchmark_a_star(c: &mut Criterion) {
     let puzzle = get_nyt_example();
     println!("{}", puzzle);
+    let solver = a_star::AStarSolver::new(1.0);
 
     c.bench_function("A* solver", |b| {
         b.iter(|| {
-            a_star::AStarSolver::solve(black_box(&puzzle));
+            solver.solve(black_box(&puzzle));
         })
     });
 }
@@ -29,9 +30,10 @@ fn benchmark_a_star_helper(c: &mut Criterion) {
     let puzzle = get_nyt_example();
     println!("{}", puzzle);
     let dict = get_smart_dict(&puzzle);
+    let solver = a_star::AStarSolver::new(1.0);
 
     c.bench_function("A* helper", |b| {
-        b.iter(|| a_star::_helper(black_box(&puzzle), black_box(&dict)));
+        b.iter(|| solver._helper(black_box(&puzzle), black_box(&dict)));
     });
 }
 

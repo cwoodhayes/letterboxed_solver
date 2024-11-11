@@ -14,6 +14,6 @@ pub mod pre_dict;
 use crate::{LBPuzzle, LBPuzzleSolution};
 
 /// Strategy for solving a puzzle
-pub trait SolverStrategy {
-    fn solve<const L: usize, const S: usize>(puzzle: &LBPuzzle<L, S>) -> Option<LBPuzzleSolution>;
+pub trait SolverStrategy<const L: usize, const S: usize> {
+    fn solve(&self, puzzle: &LBPuzzle<L, S>) -> Option<LBPuzzleSolution>;
 }

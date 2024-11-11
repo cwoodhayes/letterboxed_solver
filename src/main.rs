@@ -27,7 +27,8 @@ fn main() {
     debug!("\nPUZZLE: {}", puzzle);
 
     // solve!
-    let solution = match a_star::AStarSolver::solve(&puzzle) {
+    let solver = a_star::AStarSolver::new(1.0);
+    let solution = match solver.solve(&puzzle) {
         Some(solution) => solution,
         None => {
             eprintln!("No solution found! :(");
