@@ -4,7 +4,7 @@ use std::io::{BufRead, BufReader};
 use std::path::Path;
 use trie_rs::{Trie, TrieBuilder};
 
-pub fn get_dictionary_from_file(path: &str) -> BufReader<File> {
+pub fn get_dictionary_reader_from_file(path: &str) -> BufReader<File> {
     debug!("Loading English dictionary from file...");
     let p = Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("resources/dictionaries/{}", path));
     let file = File::open(p).unwrap();
@@ -13,12 +13,12 @@ pub fn get_dictionary_from_file(path: &str) -> BufReader<File> {
     BufReader::new(file)
 }
 
-pub fn get_dictionary_file_reader() -> BufReader<File> {
-    get_dictionary_from_file("google_10000_english.txt")
+pub fn get_default_dictionary_reader() -> BufReader<File> {
+    get_dictionary_reader_from_file("wiki-100k.txt")
 }
 
 pub fn load_trie_dictionary() -> (Trie<u8>, u32) {
-    let reader = get_dictionary_from_file("5000_common.txt");
+    let reader = get_dictionary_reader_from_file("5000_common.txt");
 
     let mut words = TrieBuilder::<u8>::new();
     let mut n_words: u32 = 0;
@@ -58,14 +58,17 @@ mod tests {
 }
 
 pub mod smart_dict {
-    use crate::dictionary;
     use crate::LBPuzzle;
     use log::info;
-    use std::collections::{HashMap, HashSet};
+    use std::collections::{BTreeMap, HashSet};
+    use std::fs::File;
     use std::io::BufRead;
+    use std::io::BufReader;
     use std::rc::Rc;
 
-    pub(crate) struct _Builder(HashMap<char, Vec<Rc<String>>>);
+    use super::get_default_dictionary_reader;
+
+    pub(crate) struct _Builder(BTreeMap<char, Vec<Rc<String>>>);
 
     impl _Builder {
         /// Sorts all the letters in the dict by length. should be called once after everything's added.
@@ -99,7 +102,7 @@ pub mod smart_dict {
             noidx.iter().cloned().enumerate().collect()
         }
 
-        pub fn take_map(self) -> HashMap<char, Vec<Rc<String>>> {
+        pub fn take_map(self) -> BTreeMap<char, Vec<Rc<String>>> {
             self.0
         }
 
@@ -107,9 +110,10 @@ pub mod smart_dict {
         ///     - only letters which are on the box can be included
         ///     - letters can only be followed by letters on the other sides
         ///     - words are >3 letters
-        pub fn new<const S: usize, const L: usize>(puzzle: &LBPuzzle<S, L>) -> Self {
-            let reader = dictionary::get_dictionary_file_reader();
-
+        pub fn new<const S: usize, const L: usize>(
+            puzzle: &LBPuzzle<S, L>,
+            dictionary_reader: BufReader<File>,
+        ) -> Self {
             // precompute valid word hashes
             let mut side_to_valids: Vec<HashSet<char>> = Vec::new();
             for side_i in 0..S {
@@ -121,20 +125,25 @@ pub mod smart_dict {
                 |idx: i32| side_to_valids.get(idx as usize / L).unwrap_or(&all_valids);
 
             // bookkeeping vars
-            let mut dictionary = Self(HashMap::new());
+            let mut dictionary = Self(BTreeMap::new());
             let mut n_words: u32 = 0;
 
             let mut n_valid_words: u32 = 0;
             let mut longest_word = 0;
 
             // Iterate over the lines in the file
-            'lines: for line in reader.lines() {
+            'lines: for line in dictionary_reader.lines() {
                 // Add each word to the set (unwrap here for simplicity, but in practice handle errors)
                 n_words += 1;
                 let line = line.unwrap();
                 let word = line.trim();
                 if word.len() > longest_word {
                     longest_word = word.len();
+                }
+
+                // quick skip any comments (some dictionaries have them)
+                if word.starts_with('#') {
+                    continue 'lines;
                 }
 
                 // evaluate the conditions described above
@@ -175,14 +184,21 @@ pub mod smart_dict {
     /// A dictionary which only contains the words & information we actually need to
     /// evaluate a specific puzzle.
     pub struct SmartDictionary {
-        _map: HashMap<char, Vec<Rc<String>>>,
+        _map: BTreeMap<char, Vec<Rc<String>>>,
         _flat: Vec<(usize, Rc<String>)>,
     }
 
     impl SmartDictionary {
         /// create the smart dictionary object
         pub fn new<const S: usize, const L: usize>(puzzle: &LBPuzzle<S, L>) -> Self {
-            let builder = _Builder::new(puzzle);
+            Self::new_from_file(puzzle, get_default_dictionary_reader())
+        }
+
+        pub fn new_from_file<const S: usize, const L: usize>(
+            puzzle: &LBPuzzle<S, L>,
+            dictionary_reader: BufReader<File>,
+        ) -> Self {
+            let builder = _Builder::new(puzzle, dictionary_reader);
 
             Self {
                 _flat: builder.get_flat_indexed(),
