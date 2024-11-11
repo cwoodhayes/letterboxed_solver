@@ -14,7 +14,7 @@ pub fn get_dictionary_reader_from_file(path: &str) -> BufReader<File> {
 }
 
 pub fn get_default_dictionary_reader() -> BufReader<File> {
-    get_dictionary_reader_from_file("google_10000_english.txt")
+    get_dictionary_reader_from_file("wiki-100k.txt")
 }
 
 pub fn load_trie_dictionary() -> (Trie<u8>, u32) {
@@ -139,6 +139,11 @@ pub mod smart_dict {
                 let word = line.trim();
                 if word.len() > longest_word {
                     longest_word = word.len();
+                }
+
+                // quick skip any comments (some dictionaries have them)
+                if word.starts_with('#') {
+                    continue 'lines;
                 }
 
                 // evaluate the conditions described above
