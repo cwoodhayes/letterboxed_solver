@@ -27,7 +27,7 @@ use pathfinding::prelude::astar;
 use std::collections::BTreeSet;
 use std::hash::Hash;
 
-use crate::solvers::pre_dict::smart_dict;
+use crate::dictionary::smart_dict;
 use crate::{LBPuzzle, LBPuzzleSolution};
 
 #[derive(Hash, Eq, PartialEq, Clone, Debug)]

@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use letterboxed_solver::dictionary::smart_dict::SmartDictionary;
 use letterboxed_solver::solvers::a_star;
-use letterboxed_solver::solvers::pre_dict::smart_dict::SmartDictionary;
 use letterboxed_solver::NYTBoxPuzzle; // Ensure this path is correct
 
 fn get_nyt_example() -> NYTBoxPuzzle {
