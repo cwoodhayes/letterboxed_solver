@@ -38,6 +38,7 @@ use pathfinding::prelude::astar;
 use std::collections::BTreeSet;
 use std::hash::Hash;
 
+use super::SolverStrategy;
 use crate::dictionary::smart_dict;
 use crate::{LBPuzzle, LBPuzzleSolution};
 
@@ -110,12 +111,13 @@ impl Vertex {
     }
 }
 
-/// Solves the puzzle using A* search.
-pub fn solve_a_star<const L: usize, const S: usize>(
-    puzzle: &LBPuzzle<L, S>,
-) -> Option<LBPuzzleSolution> {
-    let dict = smart_dict::SmartDictionary::new(&puzzle);
-    _helper(&puzzle, &dict)
+pub struct AStarSolver {}
+
+impl SolverStrategy for AStarSolver {
+    fn solve<const L: usize, const S: usize>(puzzle: &LBPuzzle<L, S>) -> Option<LBPuzzleSolution> {
+        let dict = smart_dict::SmartDictionary::new(&puzzle);
+        _helper(&puzzle, &dict)
+    }
 }
 
 /// Helper function for A* search.

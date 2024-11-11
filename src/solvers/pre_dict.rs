@@ -2,7 +2,7 @@
 //! to help narrow the word list down & enable smarter ordering
 //!
 //! So. Here's the plan.
-//! - compute a Trie dictionary which contains _only_ possible words on the box, by considering
+//! - compute a dictionary which contains _only_ possible words on the box, by considering
 //!   the following constraints:
 //!     - only letters which are on the box can be included
 //!     - letters can only be followed by letters on the other sides
@@ -12,11 +12,15 @@ use crate::dictionary::smart_dict;
 use crate::{LBPuzzle, LBPuzzleSolution};
 use log::debug;
 
-pub fn solve_pre_dict<const L: usize, const S: usize>(
-    puzzle: &LBPuzzle<L, S>,
-) -> Option<LBPuzzleSolution> {
-    let dict = smart_dict::SmartDictionary::new(&puzzle);
-    _solve_helper(&dict, puzzle, LBPuzzleSolution::new())
+use super::SolverStrategy;
+
+pub struct PreDictSolver {}
+
+impl SolverStrategy for PreDictSolver {
+    fn solve<const L: usize, const S: usize>(puzzle: &LBPuzzle<L, S>) -> Option<LBPuzzleSolution> {
+        let dict = smart_dict::SmartDictionary::new(&puzzle);
+        _solve_helper(&dict, puzzle, LBPuzzleSolution::new())
+    }
 }
 
 fn _solve_helper<const L: usize, const S: usize>(

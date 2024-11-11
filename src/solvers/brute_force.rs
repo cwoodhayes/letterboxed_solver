@@ -3,6 +3,8 @@ use crate::{LBPuzzle, LBPuzzleSolution};
 use std::collections::{HashSet, VecDeque};
 use trie_rs::Trie;
 
+use super::SolverStrategy;
+
 #[derive(Debug)]
 struct _Solution {
     pub words: LBPuzzleSolution,
@@ -36,62 +38,64 @@ impl _Solution {
     }
 }
 
-/// idiotic solver that just goes through every combo
+/// idiotic solver that just goes through every combo in DFS til it finds something that works.
 ///
 /// going about this the easy stupid way first to get a baseline.
 /// no dynamic programming, no clever optimizations, no nothing. Just a ton of wasted memory on string allocs.
 /// it doesn't try to find the best solution; it just returns the first valid solution
 /// it can find by doing recursive breadth-first search on the entire tree of possibilities.
-pub fn solve_brute_force<const L: usize, const S: usize>(
-    puzzle: &LBPuzzle<L, S>,
-) -> Option<LBPuzzleSolution> {
-    let (dict, _) = load_trie_dictionary();
+pub struct BruteForceSolver {}
 
-    // may need to use linked list here instead due to allocating a huge block of contiguous mem but we'll see
-    let mut solution_queue: VecDeque<_Solution> = VecDeque::new();
+impl SolverStrategy for BruteForceSolver {
+    fn solve<const L: usize, const S: usize>(puzzle: &LBPuzzle<L, S>) -> Option<LBPuzzleSolution> {
+        let (dict, _) = load_trie_dictionary();
 
-    println!("Initializing solutions...");
+        // may need to use linked list here instead due to allocating a huge block of contiguous mem but we'll see
+        let mut solution_queue: VecDeque<_Solution> = VecDeque::new();
 
-    // initialize our solution queue with solutions starting with each letter
-    for (i, letter) in puzzle.all_letters().chars().enumerate() {
-        let mut words = LBPuzzleSolution::new();
-        words.push(letter.to_string());
-        let visited_letters = vec![false; L * S];
+        println!("Initializing solutions...");
 
-        let soln = _Solution {
-            words,
-            last_idx: i,
-            visited_letters,
-        };
-        solution_queue.push_back(soln);
-    }
+        // initialize our solution queue with solutions starting with each letter
+        for (i, letter) in puzzle.all_letters().chars().enumerate() {
+            let mut words = LBPuzzleSolution::new();
+            words.push(letter.to_string());
+            let visited_letters = vec![false; L * S];
 
-    // now DFS over all possible options
-    while let Some(mut soln) = solution_queue.pop_front() {
-        // indicate that we've now visited this letter
-        // (doing it here so I don't have to write it every time I push to the queue)
-        soln.visited_letters[soln.last_idx] = true;
-        println!("Visiting solution: {:?}...", soln.words);
-
-        // cases
-        let curr_word = soln.words.last().expect("There should always be a word.");
-        // if our current letters make a word -- note that words must be 3 letters or greater
-        if curr_word.len() >= 3 && dict.exact_match(curr_word) {
-            // if we have a working solution, return it!
-            if soln.visited_letters.iter().all(|_l| *_l) {
-                println!("Solution found! {soln:#?}");
-                return Some(soln.words);
-            }
-
-            // otherwise, add this situation to the queue: the word ends here, and we start a new one.
-            // we need to do this for every valid letter
-            _add_all_valid_letters(&mut solution_queue, &dict, &puzzle, &soln.end_word());
+            let soln = _Solution {
+                words,
+                last_idx: i,
+                visited_letters,
+            };
+            solution_queue.push_back(soln);
         }
-        // either way, if we have the ability to continue this word, let's try that too.
-        _add_all_valid_letters(&mut solution_queue, &dict, &puzzle, &soln);
-    }
 
-    None
+        // now DFS over all possible options
+        while let Some(mut soln) = solution_queue.pop_front() {
+            // indicate that we've now visited this letter
+            // (doing it here so I don't have to write it every time I push to the queue)
+            soln.visited_letters[soln.last_idx] = true;
+            println!("Visiting solution: {:?}...", soln.words);
+
+            // cases
+            let curr_word = soln.words.last().expect("There should always be a word.");
+            // if our current letters make a word -- note that words must be 3 letters or greater
+            if curr_word.len() >= 3 && dict.exact_match(curr_word) {
+                // if we have a working solution, return it!
+                if soln.visited_letters.iter().all(|_l| *_l) {
+                    println!("Solution found! {soln:#?}");
+                    return Some(soln.words);
+                }
+
+                // otherwise, add this situation to the queue: the word ends here, and we start a new one.
+                // we need to do this for every valid letter
+                _add_all_valid_letters(&mut solution_queue, &dict, &puzzle, &soln.end_word());
+            }
+            // either way, if we have the ability to continue this word, let's try that too.
+            _add_all_valid_letters(&mut solution_queue, &dict, &puzzle, &soln);
+        }
+
+        None
+    }
 }
 
 /// adds all letters that have possible future solutions to the queue
