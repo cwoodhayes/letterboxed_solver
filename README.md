@@ -7,7 +7,7 @@ I made it as a simple fun project to learn to write Rust, so
 my priority has been more towards my own learning than towards
 general cleanliness.  
 
-By default, the CLI utility uses A* to find an optimal solution. However, my A* implementation is configurable to
+By default, the CLI utility uses A* to find an optimal solution (aka fewest words possible). However, my A* implementation is configurable to
 find suboptimal solutions for quicker runs.
 Also I don't have access to the same dictionary as NYT uses, so sometimes
 the words here aren't included there :)
