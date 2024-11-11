@@ -2,7 +2,10 @@ use env_logger::Env;
 use log::debug;
 use std::env;
 
-use letterboxed_solver::{solvers::a_star, NYTBoxPuzzle};
+use letterboxed_solver::{
+    solvers::{a_star, SolverStrategy},
+    NYTBoxPuzzle,
+};
 
 fn main() {
     env_logger::Builder::from_env(Env::default().default_filter_or("warn")).init();
@@ -24,7 +27,8 @@ fn main() {
     debug!("\nPUZZLE: {}", puzzle);
 
     // solve!
-    let solution = match a_star::solve_a_star(&puzzle) {
+    let solver = a_star::AStarSolver::new(1.0);
+    let solution = match solver.solve(&puzzle) {
         Some(solution) => solution,
         None => {
             eprintln!("No solution found! :(");

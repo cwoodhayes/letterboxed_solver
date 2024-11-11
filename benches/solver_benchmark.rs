@@ -1,7 +1,7 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use letterboxed_solver::dictionary::get_dictionary_reader_from_file;
 use letterboxed_solver::dictionary::smart_dict::SmartDictionary;
-use letterboxed_solver::solvers::a_star;
+use letterboxed_solver::solvers::{a_star, SolverStrategy};
 use letterboxed_solver::NYTBoxPuzzle; // Ensure this path is correct
 
 fn get_nyt_example() -> NYTBoxPuzzle {
@@ -17,10 +17,11 @@ fn get_smart_dict(puzzle: &NYTBoxPuzzle) -> SmartDictionary {
 fn benchmark_a_star(c: &mut Criterion) {
     let puzzle = get_nyt_example();
     println!("{}", puzzle);
+    let solver = a_star::AStarSolver::new(1.0);
 
     c.bench_function("A* solver", |b| {
         b.iter(|| {
-            a_star::solve_a_star(black_box(&puzzle));
+            solver.solve(black_box(&puzzle));
         })
     });
 }
@@ -29,9 +30,10 @@ fn benchmark_a_star_helper(c: &mut Criterion) {
     let puzzle = get_nyt_example();
     println!("{}", puzzle);
     let dict = get_smart_dict(&puzzle);
+    let solver = a_star::AStarSolver::new(1.0);
 
     c.bench_function("A* helper", |b| {
-        b.iter(|| a_star::_helper(black_box(&puzzle), black_box(&dict)));
+        b.iter(|| solver._helper(black_box(&puzzle), black_box(&dict)));
     });
 }
 
