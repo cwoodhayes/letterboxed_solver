@@ -1,29 +1,40 @@
+//! This solver finds a good puzzle solution quickly by expressing the problem as A* search.
+//! It uses pre_dict's precomputed dictionary to reduce search area.
+//!
+//! Here's how we express this as A*:
+//! define:
+//! - "coverage(v)" is the set of puzzle letters covered so far at vertex "v"
+//! - "letter" is a given letter present on the puzzle
+//! - "coverage(e)" is the set of _previously uncovered_ letters covered by edge "e"
+//! - (L*S) is the total number of letters on the puzzle
+//!
+//! our graph:
+//! - vertex: a tuple of (letter, coverage(v))
+//! - edge: an individual word, connecting from its first letter to its last letter
+//! - edge weight: (L*S). We want to minimize the number of words in our solution, so each word weighs the same
+//!   See below for why this constant is L*S.
+//!
+//! our heuristic:
+//! - h(v) = (L*S) - |coverage(v)|
+//!
+//! This heuristic+edge weight combo is chosen to ensure that the heuristic is "admissible",
+//! meaning it never overestimates the actual minimal cost to reach the goal.
+//! A* needs h(v) to have this property to guarantee finding an optimal solution.
+//!
+//! Intuitively, our h(v) makes sense because we probably get closer to the goal the more letters we've covered.
+//!
+//! However, there's a problem--we're always at risk of reaching the goal in a single word.
+//! If we leave the edge cost at 1, h(v) will pretty much always exceed it the cost of that one edge.
+//! Therefore we set the edge weight to be (L*S) to make sure h(v) is always lower.
+//!
+//! Note: search will be constrained such that we will not traverse more than max_words edges.
+//!
+//! Note 2: that at some point we could be smarter and prefer easier letters to hard ones (maybe use
+//! scrabble letter values?), but this is a good option to start with.
+//!
+
 use log::{debug, info};
 use pathfinding::prelude::astar;
-/// This solver finds a good puzzle solution quickly by expressing the problem as A* search.
-/// It uses pre_dict's precomputed dictionary to reduce search area.
-///
-/// Here's how we express this as A*:
-/// define:
-/// - "coverage(v)" is the set of puzzle letters covered so far at vertex "v"
-/// - "letter" is a given letter present on the puzzle
-/// - "coverage(e)" is the set of _previously uncovered_ letters covered by edge "e"
-/// - (L*S) is the total number of letters on the puzzle
-///
-/// our graph:
-/// - vertex: a tuple of (letter, coverage(v))
-/// - edge: an individual word, connecting from its first letter to its last letter
-/// - edge weight: 1. We want to minimize the number of words in our solution, so each word weighs the same
-///
-/// our heuristic(s):
-/// - (L*S) - |coverage(v)|.  We could be smarter and prefer easier letters to hard ones (maybe use
-///   scrabble letter values?), but this is a good option to start with.
-///   just for fun, let's tiebreak on shorter words so we get a crisper looking solution.
-///
-/// our search will be constrained such that we will not traverse more than max_words edges.
-///
-/// TODO: assess how good the solutions are. how often does it find optimal? will need to implement
-/// an exhaustive search, probably with dijkstra, to assess.
 use std::collections::BTreeSet;
 use std::hash::Hash;
 
@@ -87,7 +98,7 @@ impl Vertex {
                 words_path.push(idx);
 
                 let v = Vertex::new(w.chars().last(), coverage, Some(words_path));
-                (v, 1) // all edges are weight 1
+                (v, (L * S) as u32) // all edges are weight L*S
             })
             .collect();
         Some(successors)
@@ -117,21 +128,35 @@ pub fn _helper<const L: usize, const S: usize>(
     let mut n_nodes_visited: u64 = 0;
     let mut n_edges_traversed: u64 = 0;
 
+    // run the search
     let result = astar(
         &start,
         |v| {
             n_nodes_visited += 1;
+            #[cfg(debug_assertions)]
+            if (n_nodes_visited % 1000) == 0 {
+                let cost = v._words_path.clone().unwrap_or_default().len();
+                debug!("Nodes visited: {}...g(v)={}", n_nodes_visited, cost);
+            }
             v.successors(&dict, puzzle).unwrap_or(Vec::new())
         },
         |v| {
+            let heur = v.heuristic(&puzzle);
             n_edges_traversed += 1;
-            v.heuristic(&puzzle)
+            #[cfg(debug_assertions)]
+            if (n_edges_traversed % 100000) == 0 {
+                let cost = v._words_path.clone().unwrap_or_default().len();
+                info!("Edges traversed: {}...g(v)={}", n_edges_traversed, cost);
+            }
+            heur
         },
         |v| v.heuristic(&puzzle) == 0,
     );
+
+    // parse the solution
     let path = match result {
         Some((path, cost)) => {
-            if (path.len() - 1) != cost as usize {
+            if (path.len() - 1) != (cost / ((L * S) as u32)) as usize {
                 // path is 1 node longer than cost (aka n_words) because of the start node.
                 panic!(
                     "word len ({cost}) != path len ({}) -- the algo isn't working right",
