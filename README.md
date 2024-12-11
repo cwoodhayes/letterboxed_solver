@@ -12,10 +12,12 @@ the words here aren't valid there (such as "driveboat" in the example below)
 
 ## Usage
 ```bash
-# solve the puzzle from Nov 7, 2024, which allows 5 words
-letterboxed_solver "vro wal eth bdi" 5
-# output is:
-# SOLUTION: ["whiled", "driveboat"]
+conor@pc:~$ # solve the puzzle from Nov 7, 2024, which allows 5 words
+conor@pc:~$ cargo run "vro wal eth bdi" 5
+
+PUZZLE: "vro wal eth bdi" (turns: 5)
+SOLUTION: ["whiled", "driveboat"]
+
 ```
 
 ## Algorithm
@@ -68,4 +70,4 @@ My dictionary of english words was taken from
 I put this together once I got through Ch. 14 of 
 [The Rust Programming Language](https://doc.rust-lang.org/book/title-page.html).
 
-And thanks to my partner berit for getting me into all these NYT puzzles :)
+Also thanks to my partner berit for getting me into all these NYT puzzles :)
