@@ -23,7 +23,7 @@ impl Vertex {
             _words_path: words_path,
         };
         // # [cfg(debug_assertions)]
-        debug!("{:?}", new);
+        // debug!("{:?}", new);
         new
     }
 
@@ -150,21 +150,21 @@ impl<const L: usize, const S: usize> AStarSolver<L, S> {
             &start,
             |v| {
                 n_nodes_visited += 1;
-                #[cfg(debug_assertions)]
-                if (n_nodes_visited % 1000) == 0 {
-                    let cost = v._words_path.clone().unwrap_or_default().len();
-                    debug!("Nodes visited: {}...g(v)={}", n_nodes_visited, cost);
-                }
+                // #[cfg(debug_assertions)]
+                // if (n_nodes_visited % 1000) == 0 {
+                //     let cost = v._words_path.clone().unwrap_or_default().len();
+                //     debug!("Nodes visited: {}...g(v)={}", n_nodes_visited, cost);
+                // }
                 self.successors(&v, &dict, puzzle).unwrap_or(Vec::new())
             },
             |v| {
                 let heur = self.heuristic(&v, &puzzle);
                 n_edges_traversed += 1;
-                #[cfg(debug_assertions)]
-                if (n_edges_traversed % 100000) == 0 {
-                    let cost = v._words_path.clone().unwrap_or_default().len();
-                    info!("Edges traversed: {}...g(v)={}", n_edges_traversed, cost);
-                }
+                // #[cfg(debug_assertions)]
+                // if (n_edges_traversed % 100000) == 0 {
+                //     let cost = v._words_path.clone().unwrap_or_default().len();
+                //     info!("Edges traversed: {}...g(v)={}", n_edges_traversed, cost);
+                // }
                 heur
             },
             |v| self.heuristic(&v, &puzzle) == 0,

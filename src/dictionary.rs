@@ -14,7 +14,7 @@ pub fn get_dictionary_reader_from_file(path: &str) -> BufReader<File> {
 }
 
 pub fn get_default_dictionary_reader() -> BufReader<File> {
-    get_dictionary_reader_from_file("words_alpha.txt")
+    get_dictionary_reader_from_file("google_10000_english.txt")
 }
 
 pub fn load_trie_dictionary() -> (Trie<u8>, u32) {

@@ -12,6 +12,8 @@ use letterboxed_solver::NYTBoxPuzzle;
 fn get_test_puzzles() -> Vec<NYTBoxPuzzle> {
     vec![
         NYTBoxPuzzle::from_str(6, "erb uln imk jav").unwrap(), // nov 6, 2024
+        NYTBoxPuzzle::from_str(5, "lei xys vuc tok").unwrap(), // dec 31, 2024
+        NYTBoxPuzzle::from_str(5, "ZMC NTI SRO GHA").unwrap(), // dec 30, 2024
     ]
 }
 

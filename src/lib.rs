@@ -54,6 +54,7 @@ impl<const S: usize, const L: usize> LBPuzzle<S, L> {
     pub fn from_str(max_words: usize, sides_str: &str) -> Result<Self> {
         let mut sides = [[' '; L]; S];
 
+        let sides_str = sides_str.to_lowercase();
         let _s_vec: Vec<&str> = sides_str.split_whitespace().collect();
         // sanity check the number of sides
         if _s_vec.len() != S {
