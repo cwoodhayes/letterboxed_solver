@@ -23,7 +23,7 @@ SOLUTION: ["whiled", "driveboat"]
 ## Algorithm
 The solver finds an optimal (i.e. shortest number of words possible) solution to the puzzle
 by translating the problem into a graph search task, then applying `A*` search.  
-Here's how I did it:
+Here's my design:
 
 ### Graph + heuristic definition
 
@@ -50,7 +50,7 @@ Here's how I did it:
  #### why is each vertex a tuple?
  For instance, why not have each vertex be a word, or a letter?
 
- Defining each vertex to be a word, connected to possible subsequent words, will lead to a successful search. However, this representation fails to encode a key aspect of the puzzle: that if 2 words cover the same uncovered letters, and start and end with the same letters, they are functionally equivalent.  Encoding this idea into the graph representation makes the search area smaller, and thus the puzzle faster to solve.
+ Defining each vertex to be a word, connected to possible subsequent words, is another viable solution. However, this graph representation fails to encode a key aspect of the puzzle: that if 2 words cover the same uncovered letters, and start and end with the same letters, they are equivalent in terms of game state/proximity to our objective.  Encoding this idea into the graph enables a faster search, by shrinking the search area. Note that this issue could be addressed with a clever heuristic, making this solution similarly viable to my implementation.
 
  Defining each vertex to be a letter, connected to possible subsequent letters, doesn't work, because correct solutions on this graph will almost certainly contain cycles, which aren't discoverable by standard A*. 
 
