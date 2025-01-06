@@ -28,9 +28,9 @@ Here's how I did it:
 ### Graph + heuristic definition
 
  define:
- - `coverage(v)` is the set of puzzle letters covered so far at vertex $v$
+ - `coverage(v)` is the set of puzzle letters covered so far at vertex `v`
  - `letter` is a given letter present on the puzzle
- - `coverage(e)` is the set of _previously uncovered_ letters covered by edge $e$
+ - `coverage(e)` is the set of _previously uncovered_ letters covered by edge `e`
  - `(L*S)` is the total number of letters on the puzzle
 
  our graph:
@@ -47,14 +47,25 @@ Here's how I did it:
  meaning it never overestimates the actual cost to reach the goal.
  A* needs `h(v)` to have this property to guarantee finding an optimal solution.
 
+ #### why is each vertex a tuple?
+ For instance, why not have each vertex be a word, or a letter?
+
+ Defining each vertex to be a word, connected to possible subsequent words, will lead to a successful search. However, this representation fails to encode a key aspect of the puzzle: that if 2 words cover the same uncovered letters, and start and end with the same letters, they are functionally equivalent.  Encoding this idea into the graph representation makes the search area smaller, and thus the puzzle faster to solve.
+
+ Defining each vertex to be a letter, connected to possible subsequent letters, doesn't work, because correct solutions on this graph will almost certainly contain cycles, which aren't discoverable by standard A*. 
+
+ Making each vertex a tuple of `(letter, coverage(v))`, where each letter is a start/end letter of a word, solves this problem of valid cyclic solutions, since any path containing a cycle can be made shorter (and still valid) by omitting the cycle (i.e. `bib - bib - bark` can be shortened to `bib bark`, and `brane - earn - nab - brane - early` can be shortened to `brane - early`). 
+
  #### why the weird edge weight?
  Intuitively, `h(v) = (L*S) - |coverage(v)|` makes sense because we probably get closer to the goal the more letters we've covered.
  A naive approach would then be to set the edge weight `|e| = 1`.  
+ 
  However, this weight makes `h(v)` inadmissible--consider the case in which we cover the whole puzzle in a single lucky word. In that case, `h(v_0) = (L*S)` for start vertex `v_0`,
  but the actual path cost is `C = 1`.  
+ 
  We resolve this issue by setting `|e| = (L*S)` so that `h(v) >= C` for all `v`, since `min_possible_path_cost = (L*S) >= (L*S) - |coverage(v)|`.
 
- That said--this optimal solution takes more time to find (though still really fast for an NYT puzzle, about 25ms on 
+ That said--this optimal solution takes more time to find (though still really fast for an NYT puzzle, about 5ms on 
  my laptop). An empirically faster, possibly suboptimal solution may be found by setting edge weight to a lower value.
 
  **Note**: search will be constrained such that we will not traverse more than `max_words` edges.
