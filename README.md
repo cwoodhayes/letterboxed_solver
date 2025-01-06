@@ -65,7 +65,7 @@ Here's how I did it:
  
  We resolve this issue by setting `|e| = (L*S)` so that `h(v) >= C` for all `v`, since `min_possible_path_cost = (L*S) >= (L*S) - |coverage(v)|`.
 
- That said--this optimal solution takes more time to find (though still really fast for an NYT puzzle, about 25ms on 
+ That said--this optimal solution takes more time to find (though still really fast for an NYT puzzle, about 5ms on 
  my laptop). An empirically faster, possibly suboptimal solution may be found by setting edge weight to a lower value.
 
  **Note**: search will be constrained such that we will not traverse more than `max_words` edges.
