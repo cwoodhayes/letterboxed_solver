@@ -54,7 +54,7 @@ Here's my design:
 
  Defining each vertex to be a letter, connected to possible subsequent letters, doesn't work, because correct solutions on this graph will almost certainly contain cycles, which aren't discoverable by standard A*. 
 
- Making each vertex a tuple of `(letter, coverage(v))`, where each letter is a start/end letter of a word, solves this problem of valid cyclic solutions, since any path containing a cycle can be made shorter (and still valid) by omitting the cycle (i.e. `bib - bib - bark` can be shortened to `bib bark`, and `brane - earn - nab - brane - early` can be shortened to `brane - early`). 
+ Making each vertex a tuple of `(letter, coverage(v))`, where each letter is a start/end letter of a word, ensures that there are no optimal cyclic solutions on the graph; this is because any path containing a cycle can be made shorter (and still valid) by omitting the cycle (i.e. `bib - bib - bark` can be shortened to `bib bark`, and `brane - earn - nab - brane - early` can be shortened to `brane - early`).
 
  #### why the weird edge weight?
  Intuitively, `h(v) = (L*S) - |coverage(v)|` makes sense because we probably get closer to the goal the more letters we've covered.
