@@ -46,10 +46,9 @@ fn benchmark_pre_dict_smart_dict(c: &mut Criterion) {
     });
 }
 
-criterion_group!(
-    benches,
-    benchmark_a_star,
-    benchmark_pre_dict_smart_dict,
-    benchmark_a_star_helper
-);
+criterion_group! {
+    name = benches;
+    config = Criterion::default().sample_size(20);
+    targets = benchmark_a_star, benchmark_pre_dict_smart_dict, benchmark_a_star_helper
+}
 criterion_main!(benches);

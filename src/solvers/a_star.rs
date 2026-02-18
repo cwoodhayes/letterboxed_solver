@@ -1,4 +1,4 @@
-use log::{debug, info};
+use log::info;
 use pathfinding::prelude::astar;
 use std::collections::BTreeSet;
 use std::hash::Hash;
